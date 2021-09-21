@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Add Photo</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/static/js/jquery.min.js"></script>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <script src="/static/js/socket.io.js"></script>
+
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <script src="/static/js/socket.io.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/bootstrap.bundle.js"></script>
+
+
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script>
+        sio = io.connect()
+        var divv;
+        var dr;
+        var f = [];
+        var mhlder;
+        var tg;
+
+        function d() {
+            tg = document.getElementById("myin")
+            divv = document.getElementById("mydiv")
+            var mholder = document.getElementById('myfile')
+            console.log(mholder) ///
+            if (!mholder) {
+                console.log("mholder missing")
+            } else {
+                if (mholder.files.length < 0) {
+                    console.log("no file selected")
+                } else if (mholder.files.length > 0) {
+                    console.log(mholder.files.length)
+                        //create baby elements
+                    for (var i = 0; i < mholder.files.length; i++) {
+                        //create main div 
+                        //create img,two input elements
+                        var mmdiv = document.createElement('div')
+                        mmdiv.className = "row border"
+
+                        var pic = document.createElement('input')
+                        console.log(mholder.files)
+                        var dss = mholder.files
+                        console.log(dss)
+                        pic.files = dss
+                        console.log(pic.files)
+                        var ud = i
+                        var fr = i
+                        console.log(ud)
+                        mmdiv.style = "width:200px;margin:auto"
+                        divv.appendChild(mmdiv)
+                        console.log(mholder.files.item(i))
+                        var myt = mholder.files.item(i).type
+                        console.log(myt)
+                        var yt = myt.search('/')
+                        console.log(yt)
+                        var tt = myt.slice(0, yt)
+                        console.log(tt)
+                        if (tt === 'audio') {
+                            console.log("got audio")
+                            var nimg = document.createElement('audio')
+                            nimg.controls = true
+                            nimg.preload = false
+                        } else
+                        if (tt === 'image') {
+                            console.log("got image")
+                            var nimg = document.createElement('img')
+                        } else if (tt === 'video') {
+                            console.log("got video")
+                            var nimg = document.createElement('video')
+                            nimg.controls = true
+                            nimg.preload = true
+
+                        } else {
+                            console.log("got unwanted format")
+                            console.log("poped unwanted data")
+                            console.log(mholder.files.item(i))
+                        }
+                        console.log("getting file reader")
+                        var i;
+                        console.log("this is the filereader name")
+                        console.log(i)
+                        fr = new FileReader();
+                        console.log(i)
+                        console.log("got file reader")
+                        console.log("reading file as dataUrl")
+                        var td = mholder.files.item(i)
+                        console.log(td)
+
+                        fr.readAsDataURL(td)
+                        console.log("read file as dataUrl")
+                        console.log("creating children elements")
+                        var ninp = document.createElement('p')
+                        var ninpp = document.createElement('input')
+                        pic.type = "file"
+                        pic.style = "text-align:center;margin:auto;"
+                        pic.className = "col-12 border"
+
+                        ninp.innerText = mholder.files.item(i).name
+                        console.log(mholder.value)
+                        console.log("created children elements")
+                        console.log("adding attributes")
+
+                        nimg.className = "col-12 border"
+                        nimg.style = "margin:auto"
+                        nimg.width = "100%"
+                        nimg.height = "250px"
+                            ///nimg src after file reader
+                        ninp.className = "col-12 border"
+                        ninpp.className = "col-12 border"
+                        ninpp.type = "text"
+                        ninpp.placeholder = "Write description"
+                        ninpp.name = mholder.files.item(i).name
+                        ninp.style = "margin: auto;text-align:center"
+                        ninpp.style = "margin: auto;text-align:center;min-height: 100px;max-height:fit-content;width:300px;overflow: scroll;"
+                        console.log("added attributes")
+
+                        mmdiv.appendChild(nimg)
+                        mmdiv.appendChild(ninp)
+                        mmdiv.appendChild(ninpp)
+                        mmdiv.appendChild(mholder)
+                        divv.appendChild(pic)
+                        console.log("appended children elements")
+                        console.log("this is ud")
+                        console.log(ud)
+                        console.log(i)
+                        mholder.name = mholder.files.item(i).name
+                        mholder.style = "display:none"
+                        mholder.id = mholder.files.item(i).name + i
+                        pic.id = 'myfile'
+                        fr.onload = function(e) {
+                            var th = {};
+                            console.log("setting file src as dataUrl")
+                            var dr = e.target.result;
+                            console.log("setting file src as dataUrl")
+                            console.log("appending children elements")
+                            th[i] = dr
+                            console.log(th)
+                            f.push(dr)
+                            nimg.src = dr;
+                        }
+                        fr.onerror = function(e) {
+                                console.log("found error")
+                                console.log(e)
+                            } ///get form data 
+                    }
+                    pic.createEvent = onchange = function(e) {
+                        d()
+                    }
+                    console.log('iiiiiiiiiiiiiiiiiiiiiiiiii')
+                    console.log('till the end')
+                } else {
+                    console.log("unknown error")
+                }
+            }
+        }
+    </script>
+
+
+</head>
+
+
+<body class="container border">
+    jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj
+    <div class="row border" style="width:70%">
+        <p class="col-12 border" style="text-align:center">Add Picture Audio and Videos to album</p>
+    </div>
+    <form class="row border" method="POST" action="{{url_for('teste')}}" id="myform" enctype="multipart/form-data" style="width:70%;margin:auto">
+        <div class="col-12 border" id="mydiv"></div>
+        <div class="row border" id="myinp">
+            <input name="mfile" id="myfile" style="text-align:center;margin:auto" type="file" class="col-8 border" onchange="d()">
+        </div>
+        <span class="col-8"></span>
+        <input type="hidden" name="albumid" value="{{albumid}}" style="display: none;">
+        <button class="col-2 border btn btn-primary" style="margin:auto;margin-top:20px" type="submit" name="submit">Done</button>
+        <span class="col-2"></span>
+    </form>
+</body>
+
+</html>

@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Saved</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/static/js/jquery.min.js"></script>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <script src="/static/js/socket.io.js"></script>
+
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <script src="/static/js/socket.io.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/bootstrap.bundle.js"></script>
+
+
+
+   
+</head>
+    <script>
+        sio = io.connect(namespace = "/listphotos")
+        var mymainlist = []
+        let newposter;
+
+        function onl(albumid) {
+            console.log(albumid)
+            sio.emit('join', albumid)
+            console.log("emitted")
+        }
+        sio.on("connect", function () {
+            console.log('connected');
+            sio.emit("preview",)
+
+
+        })
+        sio.on("newdata", function (e) {
+            //new photo add to album
+            //save main list and push data here
+            console.log("new data");
+            console.log(e)
+            console.log("got file for list")
+
+            var ml = document.getElementById("mylist")
+
+            var odiv = document.createElement("div")
+            odiv.className = "col-lg-3 col-sm-4 col-md-3 col-4 mt-1 border g-0 p-0"
+            odiv.style = "flex:left;float:left;width:100%;"
+            odiv.addEventListener('click', function () {
+                view(e['Id'], mymainlist)
+            })
+
+            var indiv = document.createElement("div")
+            indiv.className = "row border g-0 p-0"
+            indiv.style = "width:100%;margin:auto"
+
+            //var im = document.createElement("img")
+            //im.className = "col-12"
+            // im.style = "height:150px;width:100%"
+
+            var mp = document.createElement("p")
+            mp.className = "col-12 border"
+            mp.style = "text-align:center;word-break:break-all;font-size:13px;height:30px;overflow:hidden"
+            //after decoration
+            var im;
+            if (e) {
+                if (e['Type'] === 'image') {
+                    console.log("got image");
+                    im = document.createElement("img")
+                   
+                  
+                }
+                else if (e['Type'] === 'video') {
+                    console.log("got video");
+                    im = document.createElement("video")
+                   
+                    
+                    im.poster = "/static/Images/Icons/church.jpg"
+
+                }
+                else if (e['Type'] === 'audio') {
+                    console.log("got audio");
+                    im = document.createElement("video")
+                   
+                   
+                    im.poster = "/static/Images/Icons/church.jpg"
+
+                }
+                else if (e['Type'] === 'document') {
+                    console.log("got document");
+                    im = document.createElement("img")
+                    
+                    
+                }
+                else {
+                    console.log("got unknown media type")
+                }
+                if (im) {
+                    im.style = "height:20vh;width:15vw"
+                    im.className = "col-12 border g-0 p-0 ml-0 mr-0"
+                    console.log("adding nodes")
+                    var sr = "/static/Images/EventPictures/" + e['Name']
+                    console.log(sr)
+                    im.src = sr
+                    indiv.appendChild(im)
+                   // indiv.appendChild(mp)
+                    odiv.appendChild(indiv)
+                    ml.appendChild(odiv)
+                    mymainlist.push(e)
+                    console.log("finished adding file and pushing to list");
+                }
+                else {
+                    console.log("did not get created file node.....check creation");
+                }
+            }
+
+        })
+
+        sio.on("managealbum", function (data) {
+            console.log("got manage data")
+            console.log(data)
+
+            //check edit delete
+            //edit change values
+            //delete remove all elements and post notice
+            if (data) {
+                if (data['Type'] === 'Update') {
+                    console.log('got update');
+                    //get labels
+                    var ev = document.getElementById("myevent")
+                    var ven = document.getElementById("myvenue")
+                    var ed = document.getElementById("mydate")
+                    var des = document.getElementById("mydesc")
+                    let odp=document.getElementById("tdp")
+
+                    if (ev && ven && ed && des && tdp) {
+                        console.log("got nodes")
+                        ev.innerText = data['Event']
+                        ven.innerText = data['Venue']
+                        ed.innerText = data['Date']
+                        des.innerText = data['Desc']
+                        
+                        if(data['DP']){
+                            odp.src="/static/Images/AlbumCovers/"+data['DP']
+                        }
+                        console.log("data updated")
+                        if (data['Flagged'] === 'True') {
+                            console.log('got flag');
+                            var fla = document.getElementById("flagtag")
+                            console.log(fla);
+                            if (fla) {
+                                console.log(fla);
+                                fla.style.display = 'block'
+                                fla.innerText = "This album has been Flagged"
+                            }
+                        }
+                    }
+                    else {
+                        console.log("failed to make update noodes not found");
+                        console.log(ev);
+                        console.log(ven);
+                        console.log(ed);
+                        console.log(des);
+                    }
+                    var eev = document.getElementById("event")
+                    var even = document.getElementById("venue")
+                    var eed = document.getElementById("date")
+                    var edes = document.getElementById("desc")
+                    if (eev && even && edes && eed) {
+                        console.log("got nodes 3")
+                        eev.value = data['Event']
+                        even.value = data['Venue']
+                        eed.value = data['Date']
+                        edes.value = data['Desc']
+                        console.log("data updated3")
+                    }
+                    else {
+                        console.log("failed to make update to edit noodes not found");
+                        console.log(ev);
+                        console.log(ven);
+                        console.log(ed);
+                        console.log(des);
+                    }
+
+                }
+                if (data['Type'] === 'Delete') {
+                    console.log('got delete');
+                    var t = data['Id']
+                    var doc = document.getElementById('removedalbum')
+                    console.log(t);
+                    console.log(doc)
+                    var b = document.getElementById("removealbum")
+                    var c = document.getElementById('myadd')
+                    var e = document.getElementById('myadddiv')
+                    var f = document.getElementById('albdiv')
+                    var g = document.getElementById('myall')
+                    var a = document.getElementById('mylist')
+                    //  var h = document.getElementById("removedalbum")
+                    var z = document.getElementById("myform")
+                    if (doc) {
+                        console.log("g.style.display ===")
+                        // h.style.display = 'none'
+                        g.style.display = "none"
+                        a.style.display = 'none'
+                        b.style.display = 'none'
+                        c.style.display = 'none'
+                        e.style.display = 'none'
+                        f.style.display = 'none'
+                        z.style.display = 'none'
+                        doc.style.display = 'block'
+                    }
+                    var am = document.getElementById("albummenu")
+                    if (am) {
+                        am.style.display = 'none'
+                    }
+
+
+                }
+
+                if (data['Type'] === 'Flag') {
+                    console.log('got flag');
+                    var fla = document.getElementById("flagtag")
+                    console.log(fla);
+
+                    if (fla) {
+                        console.log(fla);
+                        fla.style.display = 'block'
+                        fla.innerText = "This album has been Flagged"
+                    }
+
+                }
+                if (data['Type'] === 'NoData') {
+                    console.log('got no data');
+
+                    var doc = document.getElementById('removedalbum')
+                    console.log(t);
+                    console.log(doc)
+                    var b = document.getElementById("removealbum")
+                    var c = document.getElementById('myadd')
+                    var e = document.getElementById('myadddiv')
+                    var f = document.getElementById('albdiv')
+                    var g = document.getElementById('myall')
+                    var a = document.getElementById('mylist')
+                    //  var h = document.getElementById("removedalbum")
+                    var z = document.getElementById("myform")
+                    if (doc) {
+                        console.log("g.style.display ===")
+                        // h.style.display = 'none'
+                        g.style.display = "none"
+                        a.style.display = 'none'
+                        b.style.display = 'none'
+                        c.style.display = 'none'
+                        e.style.display = 'none'
+                        f.style.display = 'none'
+                        z.style.display = 'none'
+                        doc.style.display = 'block'
+                    }
+                    var am = document.getElementById("albummenu")
+                    if (am) {
+                        am.style.display = 'none'
+                    }
+
+
+                }
+            }
+        })
+    </script>
+</head>
+
+<body class="g-0 p-0"
+    style="width:100vw;scrollbar-width:5px;font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;font-size: 17px;"
+    onload="onl({{id}})">
+    <div class="container-fluid border">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light"
+            style="position:fixed;display:inline-flex;width: 100%;z-index:3;top:0px;height:fit-content;margin: auto;left: 0px;">
+            <a class="navbar-brand" href="{{url_for('gall')}}">Home</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto" style="align-content: space-around;width: 100%;">
+                 
+                    <li class="nav-item col-2" style="margin: auto;">
+                        <a class="nav-link" href="{{url_for('gall')}}">Our Gallery</a>
+                    </li>
+                   
+
+                </ul>
+            </div>
+        </nav>
+    </div>
+    <div class="container-fluid g-0 p-0" style="width: 100vw;margin:auto;margin-top:7vh;">
+        <div class="row g-0 p-0 " style="width:auto;margin:0px;">
+            <div class="col-lg-8 col-sm-12 col-md-12 col-12 g-0 p-0" style="margin: auto;width:100%;">
+                <div class="row border g-0 p-0 ml-0" id="m" style="width: auto;margin: auto;">
+                    <a href="{{url_for('gall')}}">
+                        <button class="btn btn-primary form-control g-0 p-0 mt-2 mb-1" style="z-index:5;height: min-content;width: min-content;position: absolute;">Albums</button>
+                    </a>
+                </div>
+                <div class="row g-0 p-0" id="removedalbum"
+                    style="margin:auto;border-radius: 15px;width:90%;height:700px;background-color:white;display:none;justify-content:center">
+                    <img class="col-lg-12 col-sm-12 col-md-12 col-12" src="/static/Images/Icons/albrm.png">
+                </div>
+                <div class="row shadow-sm rounded" id="removealbum"
+                    style="margin:10%;border-radius:15px;width:80%;;background-color:red;display:none;justify-content:center;">
+                    <p class="col-lg-12 col-sm-12 col-md-12 col-12 shadow-sm rounded"
+                        style="text-align: center;font-size:20px;border-radius:15px;color: seashell;">Delete Album</p>
+                    <div class="row"
+                        style="display:flex;justify-content:center;width:100%;margin-top:40px;margin-bottom:25px">
+                        <p class="col-lg-12 col-sm-12 col-md-12 col-12"
+                            style="text-align: center;font-size:20px;border-radius:15px;color: seashell;">
+                            Are you
+                            sure?</p>
+                        <button class="border col-lg-2 col-sm-2 col-md-2 col-2 btn btn-primary"
+                            onclick="onfandr('show','removealbum')" style="margin:3px">Keep</button>
+                        <button class="border col-lg-2 col-sm-2 col-md-2 col-2 btn btn-primary"
+                            onclick="albumdelete({{id}})" style="margin:3px">Remove</button>
+                    </div>
+                </div>
+                <div class="row shadow-sm round " id="flagalbum"
+                    style="margin:10%;;border-radius:15px;width:80%;height:max-content;background-color:red;display:none;justify-content:center;">
+                    <p class="col-lg-12 col-sm-12 col-md-12 col-12  shadow-sm"
+                        style="text-align:center;font-size:20px;">Flag Photo</p>
+                    <textarea class="col-7 border form-control" id='flagreason' style="margin:auto;margin-bottom:20px"
+                        placeholder="Reason for Flagging"></textarea>
+                    <div class="row" style="justify-content:center;display:flex;width:100%">
+                        <button class="border col-lg-2 col-sm-2 col-md-2 col-2 btn btn-primary form-control"
+                            style="margin:3px" onclick="onfandr('show','flagalbum')">Cancel</button>
+                        <button class="border col-lg-2 col-sm-2 col-md-2 col-2 btn btn-primary form-control"
+                            style="margin:3px" onclick="albumflag({{id}})">Flag</button>
+                    </div>
+                </div>
+                <script>
+                    function togglemenu() {
+                        //togglemenu
+                        console.log('toggling menu');
+                        var am = document.getElementById("albummenu")
+                        console.log(am);
+                        if (am) {
+                            if (am.style.display === "none") {
+                                am.style.display = "block"
+                            } else if (am.style.display === "") {
+                                am.style.display = "block"
+                            } else if (am.style.display === "block") {
+                                am.style.display = "none"
+                            } else {
+                                am.style.display = "block"
+                            }
+                        }
+                    }
+
+                    function albumflag(albumid) {
+                        //get reason and album data
+                        console.log('got flag');
+                        console.log(albumid);
+                        var fr = document.getElementById('flagreason')
+                        if (albumid && fr) {
+
+                            album = {
+                                'Type': "Flag",
+                                'Reason': fr.value,
+                                'Id': albumid
+                            }
+                            console.log(album);
+                            sio.emit("managealbum", album)
+                            console.log('emmited');
+                            var fla = document.getElementById("flagtag")
+                            if (fla) {
+                                console.log(fla);
+                                fla.style.display = 'block'
+                                fla.innerText = "This album has been Flagged"
+                            }
+                        }
+                        onfandr('show', 'flagalbum')
+                        fr.value = ''
+                    }
+
+                    function albumdelete(albumid) {
+                        console.log(albumid);
+                        if (albumid) {
+                            data = {
+                                'Type': "Delete",
+                                'Id': albumid
+                            }
+                            console.log(data);
+                            sio.emit("managealbum", data)
+                            console.log('emitted');
+                            onfandr('hide', 'removedalbum')
+                        }
+                    }
+
+                    function tonremove(cmd) {
+                        var b = document.getElementById("removealbum")
+                        var c = document.getElementById('myadd')
+                        var e = document.getElementById('myadddiv')
+                        var f = document.getElementById('albdiv')
+                        var g = document.getElementById('myall')
+                        var a = document.getElementById('mylist')
+                        var h = document.getElementById("removedalbum")
+                        var z = document.getElementById("myform")
+
+                        console.log(z)
+                        console.log(g)
+                        if (g) {
+                            if (cmd === 'show') {
+                                console.log("g.style.display === none")
+                                g.style.display = "block"
+                                b.style.display = 'block'
+                                c.style.display = 'block'
+                                e.style.display = 'block'
+                                f.style.display = 'block'
+                                a.style.display = 'block'
+                                z.style.display = 'block'
+                                h.style.display = 'none'
+                            }
+                            if (cmd === "hide") {
+                                console.log("g.style.display ===")
+                                h.style.display = 'block'
+                                g.style.display = "none"
+                                a.style.display = 'none'
+                                b.style.display = 'none'
+                                c.style.display = 'none'
+                                e.style.display = 'none'
+                                f.style.display = 'none'
+                                z.style.display = 'none'
+                            }
+                        }
+                    }
+
+                    function onfandr(cmd, id) {
+                        var doc = document.getElementById(id)
+                        console.log(id);
+                        console.log(doc)
+                        var b = document.getElementById("removealbum")
+                        var c = document.getElementById('myadd')
+                        var e = document.getElementById('myadddiv')
+                        var f = document.getElementById('albdiv')
+                        var g = document.getElementById('myall')
+                        var a = document.getElementById('mylist')
+                        var h = document.getElementById("removedalbum")
+                        var z = document.getElementById("myform")
+                        if (doc) {
+                            if (cmd === 'show') {
+                                if (id === 'removealbum' || 'flagalbum') {
+                                    console.log("g.style.display === none")
+                                    // g.style.display ="flex"
+                                    //b.style.display ="flex"
+                                    c.style.display = "flex"
+                                    e.style.display = "flex"
+                                    f.style.display = "flex"
+                                    a.style.display = "flex"
+                                    // z.style.display ="flex"
+                                    // h.style.display ="flex"
+                                    doc.style.display = 'none'
+                                }
+                            }
+                            if (cmd === "hide") {
+                                if (id === 'removealbum' || 'flagalbum') {
+                                    console.log("g.style.display ===")
+                                    h.style.display = 'none'
+                                    g.style.display = "none"
+                                    a.style.display = 'none'
+                                    b.style.display = 'none'
+                                    c.style.display = 'none'
+                                    e.style.display = 'none'
+                                    f.style.display = 'none'
+                                    z.style.display = 'none'
+                                    doc.style.display = 'block'
+                                }
+                                if (id === 'removedalbum') {
+                                    console.log("g.style.display ===")
+                                    h.style.display = 'none'
+                                    g.style.display = "none"
+                                    a.style.display = 'none'
+                                    b.style.display = 'none'
+                                    c.style.display = 'none'
+                                    e.style.display = 'none'
+                                    f.style.display = 'none'
+                                    z.style.display = 'none'
+                                    doc.style.display = 'block'
+                                }
+                            }
+                        }
+                        var am = document.getElementById("albummenu")
+                        if (am) {
+                            am.style.display = 'none'
+                        }
+                    }
+                </script>
+                <div class="row border g-0 p-0" id="albdiv"
+                    style="width:100%;margin:auto;margin-bottom:20px;border-radius:15px;display:flex;overflow-x: hidden;">
+                    <img class="" type="image" onClick="togglemenu()" src='/static/Images/Icons/men.png'
+                        style="margin-left:98%;height:15px;width:12px;z-index: 2;">
+                    <div class="row border bg-light g-2 p-2" id="albummenu"
+                        style="margin-left:auto;margin-right:0px;height:fit-content;display:none;width:max;position:absolute;left:45%;margin-top: 5%;z-index: 2;">
+                        <label class="col-lg-12 col-sm-12 col-md-12 col-12 border"
+                            onclick="onfandr('hide','removealbum')"
+                            style="margin:0px;height:fit-content;text-align: center;">
+                            remove</label>
+                        <label class="col-lg-12 col-sm-12 col-md-12 col-12 border mt-1" onclick="showal()"
+                            style="margin:0px;height:fit-content;text-align: center;">
+                            edit</label>
+                        <label class="col-lg-12 col-sm-12 col-md-12 col-12 mt-1 border"
+                            onclick="onfandr('hide','flagalbum')"
+                            style="margin:0px;height:fit-content;text-align: center;">flag</label>
+                    </div>
+                    <div class="row  mt-3 mb-0" style="width: 100%;height: 220px;margin: auto;">
+                        <h class="col-lg-12 col-sm-12 col-md-12 col-12 g-0 p-0 mt-0 mb-0 " id="myevent" href=""
+                            style="word-break:break-all;font-size:26px;height:min-content;overflow: hidden;text-align: center;color: blue;">
+                        </h>
+                        <img class=" col-12" id="tdp" src="/static/Images/Icons/church.jpg" height="177px"
+                            style="margin: auto;width: 100%;position: absolute;margin-top: 40px">
+                        <div class="row g-0 p-0 ml-0 mb-0 mt-auto  bg-light" style="width: 100vw;margin: 0px;">
+                            <div class="col-lg-5 col-sm-12 col-md-10 col-12 g-0 p-0 ml-0 mb-0 mt-auto"
+                                id="albdiv" style="width: 100%;height: auto;margin: auto;float: left;">
+                                <div class="row bg-light g-0 p-0 mb-0 mt-auto"
+                                    style="width:fit-content;margin:auto;margin-bottom:20px;float: left;font-size: 14px;color: blue;">
+                                    <label for="" class="col-lg-3 col-sm-3 col-md-3 col-4 g-0 p-0"
+                                        style="margin:auto;text-align:left;margin-top: 5px;overflow: hidden;width:">Venue</label>
+                                    <label class="col-lg-9 col-sm-8 col-md-8 col-7  g-0 p-0" id="myvenue"
+                                        style="margin:auto;text-align:left;margin-top: 5px;overflow: hidden;"></label>
+                                    <label for="" class="col-lg-3 col-sm-3 col-md-3 col-4  g-0 p-0"
+                                        style="margin: auto;text-align:left;margin-top: 5px;overflow: hidden;">Event
+                                        Date</label>
+                                    <label class="col-lg-9 col-sm-8 col-md-8 col-7  g-0 p-0" id="mydate"
+                                        style="margin: auto;text-align:left;margin-top: 5px;overflow: hidden;"></label>
+                                    <label for="" class="col-lg-3 col-sm-3 col-md-3 col-4  g-0 p-0"
+                                        style="margin: auto;text-align:left;margin-top: 5px;overflow: hidden;">Description</label>
+                                    <label class="col-lg-9 col-sm-8 col-md-8 col-7  g-0 p-0" id="mydesc"
+                                        style="margin: auto;text-align:left;margin-top: 5px;word-break:break-all;overflow: hidden;"></label>
+                                    <p class="col-lg-12 col-sm-12 col-md-12 col-12 g-0 p-0" id="flagtag "
+                                        style="text-align:right;color:red;font-size:12px;height:fit-content;display:none;overflow: hidden;">
+                                        THis
+                                        Album Has Been
+                                        Flagged</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    function showal() {
+                        var a = document.getElementById('myform')
+                        var b = document.getElementById('albdiv')
+                        var c = document.getElementById('myadd')
+                        var d = document.getElementById("albummenu")
+                        var e = document.getElementById("mylist")
+
+                        if (d) {
+                            d.style.display = "none";
+                        }
+                        console.log(a)
+                        console.log(b)
+                        if (a) {
+                            if (a.style.display === "none") {
+                                a.style.display = 'flex'
+                                b.style.display = 'none'
+                                c.style.display = 'none'
+                                e.style.display = 'none'
+                            } else if (a.style.display === "") {
+                                b.style.display = 'none'
+                                c.style.display = 'none'
+                                a.style.display = 'flex'
+                                e.style.display = 'none'
+                            } else if (a.style.display === "block") {
+                                a.style.display = 'none'
+                                b.style.display = 'flex'
+                                c.style.display = 'flex'
+                                e.style.display = 'flex'
+                            } else {
+                                b.style.display = 'flex'
+                                a.style.display = 'none'
+                                c.style.display = 'flex'
+                                e.style.display = 'flex'
+                            }
+                        }
+                    }
+
+                    function hideal() {
+                        //var b = document.getElementById('mybtn')
+                        var c = document.getElementById('myadd')
+                        var e = document.getElementById('myadddiv')
+                        var f = document.getElementById('albdiv')
+                        var g = document.getElementById('myall')
+                        var a = document.getElementById('mylist')
+                        console.log(a)
+                        console.log(g)
+                        if (g) {
+                            if (g.style.display === "none") {
+                                console.log("g.style.display === none")
+                                g.style.display = "flex"
+                                //  b.style.display = 'none'
+                                c.style.display = 'none'
+                                e.style.display = 'none'
+                                f.style.display = 'none'
+                                a.style.display = 'none'
+                            } else if (g.style.display === "") {
+                                console.log("g.style.display ===")
+                                g.style.display = "flex"
+                                //    b.style.display = 'none'
+                                c.style.display = 'none'
+                                e.style.display = 'none'
+                                f.style.display = 'none'
+                                a.style.display = 'none'
+                            } else if (g.style.display === "block") {
+                                g.style.display = 'none'
+                                a.style.display = 'flex'
+                                //    b.style.display = 'initial'
+                                e.style.display = 'initial'
+                                c.style.display = 'initial'
+                                f.style.display = 'flex'
+                            } else {
+                                g.style.display = 'none'
+                                a.style.display = 'flex'
+                                //    b.style.display = 'initial'
+                                e.style.display = 'initial'
+                                c.style.display = 'initial'
+                                f.style.display = 'flex'
+                            }
+                        }
+                    }
+
+                    function addtoggle() {
+                        console.log("toogling add photo")
+                        var g = document.getElementById('addphoto')
+                        if (g) {
+                            var b = document.getElementById('m')
+                            var c = document.getElementById('myadd')
+                            var e = document.getElementById('myadddiv')
+                            var f = document.getElementById('albdiv')
+                            // var h = document.getElementById('myall')
+                            var a = document.getElementById('mylist')
+                            console.log(a)
+                            console.log(g)
+                            if (g) {
+                                if (g.style.display === "none") {
+                                    console.log("g.style.display === none")
+                                    g.style.display = "block"
+                                    b.style.display = 'none'
+                                    c.style.display = 'none'
+                                    // h.style.display = 'none'
+                                    e.style.display = 'none'
+                                    f.style.display = 'none'
+                                    a.style.display = 'none'
+                                } else if (g.style.display === "") {
+                                    console.log("g.style.display ===")
+                                    g.style.display = "block"
+                                     b.style.display = 'none'
+                                    c.style.display = 'none'
+                                    // h.style.display = 'none'
+                                    e.style.display = 'none'
+                                    f.style.display = 'none'
+                                    a.style.display = 'none'
+                                } else if (g.style.display === "block") {
+                                    g.style.display = 'none'
+                                    a.style.display = 'flex'
+                                    b.style.display = 'initial'
+                                    //  h.style.display = 'initial'
+                                    e.style.display = 'initial'
+                                    c.style.display = 'initial'
+                                    f.style.display = 'flex'
+                                } else {
+                                    g.style.display = 'none'
+                                    a.style.display = 'initial'
+                                     b.style.display = 'initial'
+                                    //  h.style.display = 'initial'
+                                    e.style.display = 'initial'
+                                    c.style.display = 'initial'
+                                    f.style.display = 'flex'
+                                }
+                            }
+                        }
+                    }
+                </script>
+                <div class="row g-0 p-0" id="myadddiv" style="margin: auto;">
+                    <button id="myadd" onclick="addtoggle()"
+                        class="btn btn-secondary col-lg-3 col-sm-3 col-md-3 col-8 form-control">Add photo to
+                        album</button>
+                </div>
+                <div class="row form-group shadow" id="myform"
+                    style="width:80%;margin:auto;margin-bottom:20px;display:none">
+                    <p class="col-lg-12 col-sm-12 col-md-12 col-12 form-label shadow-sm"
+                        style="margin: auto;text-align:center;margin-top: 5px;color: royalblue;font-size: large;">Edit
+                        Album
+                        Details
+                    </p>
+                    <div class="row border mb-2" style="width: 100%;margin: auto;">
+                        <img src="/static/Images/Icons/church.jpg" id='mypic' height="200px" style="width: 100%;">
+                        <input class="border form-control" required id="pic" value="" name="pic" type="file"
+                            onchange="cover({{id}})" style="margin: auto;text-align:center;margin-top: 5px">
+                        <script>
+                            function cover(id) {
+                                console.log('changing cover');
+                                console.log(id);
+                                var f = document.getElementById('pic');
+                                console.log(f.files);
+                                var pp = "mypic"
+                                var dip = document.getElementById(pp)
+                                console.log(pp);
+                                //check if file is image
+                                if (f && f.files.length > 0) {
+                                    console.log('got files');
+                                    var fi = f.files.item(0)
+                                    console.log(fi);
+                                    if (fi) {
+                                        console.log('got files');
+                                        var t = fi.type
+                                        console.log(t);
+                                        var yt = t.search('/')
+                                        console.log(yt)
+                                        var tt = t.slice(0, yt)
+                                        console.log(tt)
+                                        var n = fi.name
+                                        if (tt === 'image') {
+                                            console.log('got image');
+                                            var nr = new FileReader()
+                                            nr.readAsDataURL(fi)
+                                            nr.onload = function (y) {
+                                                var dr = y.target.result;
+                                                console.log('got target.result');
+                                                console.log(dip);
+                                                dip.src = dr
+                                                //sio.emit
+                                                newposter = {
+                                                    "Id": id,
+                                                    "File": fi,
+                                                    "Type": "Edit",
+                                                    "Name": n,
+                                                }
+                                                console.log(newposter);
+                                                // sio.emit("albumcover", data)
+                                                console.log('emited');
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            sio.on("albumcover", function (x) {
+                                console.log('got data');
+                                console.log(x);
+                                //get album dp image and change src
+                               
+                                console.log(d);
+                                var dp = document.getElementById('tdp')
+                                console.log(dp);
+                                if (dp) {
+                                    console.log('cover pic');
+                                    var s = "/static/Images/AlbumCovers/" + x['File']
+                                    console.log(s);
+                                    dp.src = s
+                                }
+                            })
+                        </script>
+                    </div>
+                    <span class="col-lg-12 col-sm-12 col-md-12 col-12"></span>
+                    <label for="" class="col-lg-3 col-sm-11 col-md-3 form-label"
+                        style="margin: auto;text-align:center;margin-top: 5px">Event</label>
+                    <input class="col-lg-8 col-sm-8 col-md-8 col-8 border form-control" required id="event" value=""
+                        name="event" type="text" style="margin: auto;text-align:center;margin-top: 5px">
+                    <label for="" class="col-lg-3 col-sm-11 col-md-3  form-label"
+                        style="margin: auto;text-align:center;margin-top: 5px">Venue</label>
+                    <input class="col-lg-8 col-sm-8 col-md-8 col-8 border form-control" required id="venue" name="venue"
+                        value="" type="text" style="margin: auto;text-align:center;margin-top: 5px">
+                    <label for="" class="col-lg-3 col-sm-11 col-md-3  form-label"
+                        style="margin: auto;text-align:center;margin-top: 5px">Event
+                        Date</label>
+                    <input class="col-lg-8 col-sm-8 col-md-8 col-8 form-control" required id="date" value=""
+                        name="eventdate" type="date" style="margin: auto;text-align:center;margin-top: 5px">
+                    <label for="" class="col-lg-3 col-sm-11 col-md-3  form-label"
+                        style="margin: auto;text-align:center;margin-top: 5px">Description</label>
+                    <textarea class="col-lg-8 col-sm-8 col-md-8 col-8 border form-control" id="desc" name="desc"
+                        value="" type="text" style="margin: auto;text-align:center;margin-top: 5px"></textarea>
+                    <span class="col-lg-7 col-md-5 col-sm-0 col-0"></span>
+                    <input type="hidden" name="albumid" value="">
+
+                    <button class="col-lg-2 col-sm-4 col-md-3 mt-2 col-4  btn btn-primary form-control"
+                        style="margin-top: 10px;margin:auto;float: right;" type="reset" name="reset"
+                        onclick="showal()">Cancel</button>
+                    <button class="col-lg-2 col-sm-4 col-md-3 col-4 mt-2 btn btn-primary form-control"
+                        style="margin-top: 10px;margin:auto;float: right" onclick="myff({{id}})">Submit</button>
+                    <script>
+                        function myff(album) {
+                            //action="{{url_for('editAlbum')}}"
+                            //method="GET"
+                            console.log("in this")
+                            console.log(album)
+                            var ev = document.getElementById("event")
+                            var ven = document.getElementById("venue")
+                            var ed = document.getElementById("date")
+                            var des = document.getElementById("desc")
+                            console.log(ev);
+                            console.log(ven);
+                            console.log(ed);
+                            console.log(des);
+                            if (ev && ven && ed && des) {
+                                console.log("got 2")
+                                event = ev.value;
+                                venue = ven.value;
+                                eventd = ed.value;
+                                desc = des.value;
+                                //sio emit
+                                data = {
+                                    'Event': event,
+                                    'Venue': venue,
+                                    'Date': eventd,
+                                    'Desc': desc,
+                                    'Type': 'Edit',
+                                    'Id': album
+                                }
+                                if (newposter) {
+                                    console.log('new poster');
+                                    console.log(newposter);
+                                    sio.emit("albumcover", newposter)
+                                    console.log('emited');
+                                } else {
+                                    console.log("no poster");
+                                }
+                                console.log(data)
+                                //sio.emit("managealbum", data)
+                                console.log("emmited")
+                            }
+                            else {
+                                console.log("failed to get elementonodes");
+                            }
+                        }
+                        var myf = document.getElementById("myform")
+                        console.log("my form")
+                        console.log(myf)
+                        myf.onsubmit = function (e) {
+                            var v = document.getElementById("venue")
+                            console.log(v)
+                            var e = document.getElementById("event")
+                            console.log(e)
+                            var d = document.getElementById("eventdate")
+                            console.log(d)
+                            if (v.value == "") {
+                                return false
+                            } else if (e.value == "") {
+                                return false
+                            } else if (d.value == "") {
+                                return false
+                            } else {
+                                return true
+                            }
+                        }
+                    </script>
+                </div>
+                <div class="row g-0 p-0" id="mylist" style="margin:auto;width:100%;">
+                </div>
+                <div class="row g-0 p-0  " id="myall"
+                    style="top:0px;bottom:10px;height:93%;margin:auto;position:fixed;left:0px;right:0px;display:none;width:100%;margin-top:10vh;overflow-y:auto;">
+
+                    <div class="col-lg-8 col-sm-11 col-md-11 col-11  g-0 p-0 mx-auto border">
+                        <div class="row border g-0 p-0" style="height:25px;">
+                            <input type="image" src="/static/Images/Icons/x.png"
+                            style="position:absolute;display:block;right:0%;border-radius:25px;z-index: 2;float: right;margin-top:0%;" 
+                                height="25px" width="25px" class="border" onclick="hideal()">
+                            
+                        </div>
+                       
+                        <input type="image" src="/static/Images/Icons/back.png" height="20px" width="40px" class="border"
+                            style="display:block;left:2%;border-radius:25px;z-index: 2;float: left" name="prev"
+                            id="prev">
+                        <input type="image" src="/static/Images/Icons/forward.png" height="20px" width="40px" class="border"
+                            style="display:block;right:2%;border-radius:25px;z-index: 2;float: right;" name="nex"
+                            id="nex">
+                    </div>
+
+                  
+                    <div class="col-lg-11 col-sm-11 col-md-11 col-11 g-0 p-0" id="viewpage"
+                        style="width:100%;height:100%;margin:auto;overflow-y:auto;">
+                        <iframe class="p-0 g-0 m-auto "
+                            style="width:100%;margin:auto;height:90%;overflow-y:hidden"
+                            id="myframe"></iframe>
+                    </div>
+                </div>
+                <div class="row shadow border mb-3" id="addphoto"
+                    style="top:0px;bottom:10px;height:fit-content;margin:auto;position:static;left:10px;right:10px;display:none">
+                    <img src="/static/Images/Icons/back.png" height="40px" width="70px"
+                        style="margin: 10px;border-color: royalblue;z-index: 3;" class="border rounded shadow-sm g-2 p-2 mr-0   "
+                        name="back" onclick="addtoggle()">
+                    <span class="col-lg-9 col-sm-9 col-md-9 col-9"></span>
+                    <form class="row mb-3" method="POST" action="{{url_for('teste')}}" id="myform"
+                        enctype="multipart/form-data" style="width:70%;margin:auto">
+                        <div class="row " id="mydiv" style="width:100%">
+                        </div>
+                        <div class="row " id="myinp" style="width: 100%;">
+                            <input name="mfile" id="myfile" style="text-align:center;" type="file" class="col-4"
+                                onchange="d()">
+                        </div>
+                        <span class="col-lg-8 col-sm-8 col-md-8 col-8"></span>
+                        <input type="hidden" name="albumid" value="{{id}}" style="display: none;">
+                        <button class="col-lg-3 col-sm-3 col-md-3 col-3 btn btn-primary"
+                            style="margin:auto;margin-top:20px" type="submit" name="submit">Done</button>
+                        <span class="col-lg-3 col-sm-3 col-md-3 col-3"></span>
+                    </form>
+                </div>
+                <script>
+                    var divv;
+                    var dr;
+                    var f = [];
+                    var mhlder;
+                    var tg;
+
+                    function d() {
+                        var tg = document.getElementById("myinp")
+                        var divv = document.getElementById("mydiv")
+                        var mholder = document.getElementById('myfile')
+                        console.log(mholder) ///
+                        if (!mholder) {
+                            console.log("mholder missing")
+                        } else {
+                            if (mholder.files.length < 0) {
+                                console.log("no file selected")
+                            } else if (mholder.files.length > 0) {
+                                console.log(mholder.files.length)
+                                //create baby elements
+                                //create main div
+                                //create img,two input elements
+                                var mmdiv = document.createElement('div')
+                                mmdiv.className = "col-3 border"
+                                var middd = "newdiv" + Math.round(Math.random() * 100000)
+                                mmdiv.id = middd
+
+                                var pic = document.createElement('input')
+                                var sy = document.getElementById("myinp")
+                                sy.appendChild(pic)
+                                console.log(mholder.files)
+                                var dss = mholder.files
+                                console.log(dss)
+                                pic.files = dss
+                                console.log(pic.files)
+                                var ud = i
+                                var fr = i
+                                console.log(ud)
+                                mmdiv.style = "border-radius:15px;margin-bottom:5px"
+                                divv.appendChild(mmdiv)
+                                console.log(mholder.files.item(0))
+                                var myt = mholder.files.item(0).type
+                                console.log(myt)
+                                var yt = myt.search('/')
+                                console.log(yt)
+                                var tt = myt.slice(0, yt)
+                                console.log(tt)
+                                if (tt === 'audio') {
+                                    console.log("got audio")
+                                    var nimg = document.createElement('video')
+                                    nimg.controls = true
+                                    nimg.preload = true
+                                    nimg.poster = "/static/Images/Icons/church.jpg"
+                                    nimg.style = "margin:auto;border-radius:15px;height:200px;width:100%"
+                                } else
+                                    if (tt === 'image') {
+                                        console.log("got image")
+                                        var nimg = document.createElement('img')
+                                        nimg.style = "margin:auto;border-radius:15px;height:200px;width:100%"
+                                    } else if (tt === 'video') {
+                                        console.log("got video")
+                                        var nimg = document.createElement('video')
+                                        nimg.style = "margin:auto;border-radius:15px;height:200px;width:100%"
+                                        nimg.controls = true
+                                        nimg.preload = true
+                                    } else {
+                                        console.log("got unwanted format")
+                                        console.log("poped unwanted data")
+                                        console.log(mholder.files.item(0))
+                                    }
+                                console.log("getting file reader")
+                                var i;
+                                console.log("this is the filereader name")
+                                console.log(i)
+                                fr = new FileReader();
+                                console.log(i)
+                                console.log("got file reader")
+                                console.log("reading file as dataUrl")
+                                var td = mholder.files.item(0)
+                                console.log(td)
+
+                                fr.readAsDataURL(td)
+                                console.log("read file as dataUrl")
+                                console.log("creating children elements")
+                                var ninp = document.createElement('p')
+                                var ninpp = document.createElement('textarea')
+
+                                pic.type = "file"
+                                pic.style = "text-align:center;margin:auto;"
+                                pic.className = "col-lg-8 col-sm-8 col-md-8 col-8"
+
+                                ninp.innerText = mholder.files.item(0).name
+                                console.log(mholder.value)
+                                console.log("created children elements")
+                                console.log("adding attributes")
+
+                                nimg.className = "col-lg-12 col-sm-12 col-md-12 col-12 border"
+                                var kid = "newfile" + Math.round(Math.random() * 100000)
+                                mholder.id = kid
+
+                                cbtn = document.createElement('p');
+                                cbtn.className = "border ";
+                                cbtn.style = "margin:auto;text-align:left;margin-left:auto;height:20px;width:20px;position:absolute";
+                                cbtn.innerText = "X"
+                                cbtn.id = Math.round(Math.random() * 100000)
+                                cbtn.addEventListener('click', function (ee) {
+                                    //takes file id and div id
+                                    console.log(kid);
+                                    ya = ee.target.id
+                                    console.log('clicked remove');
+                                    console.log(middd)
+                                    console.log(kid);
+                                    removeselect(middd, kid)
+                                })
+                                ///nimg src after file reader
+                                ninp.className = "col-lg-12 col-sm-12 col-md-12 col-12"
+                                ninp.style = "margin: auto;text-align:left;overflow:hidden"
+
+                                ninpp.className = "col-lg-12 col-sm-12 col-md-12 col-12 border"
+                                ninpp.type = "text"
+                                ninpp.placeholder = "Write description"
+                                ninpp.name = mholder.files.item(0).name
+                                ninpp.style =
+                                    "margin: auto;text-align:center;min-height:40px;max-height:fit-content;border-radius:15px;"
+                                console.log("added attributes")
+
+                                mmdiv.appendChild(cbtn)
+                                mmdiv.appendChild(nimg)
+
+                                mmdiv.appendChild(ninp)
+                                mmdiv.appendChild(ninpp)
+                                mmdiv.appendChild(mholder)
+                                tg.appendChild(mholder)
+                                divv.appendChild(sy)
+
+                                console.log("appended children elements")
+                                console.log("this is ud")
+                                console.log(ud)
+                                console.log(i)
+                                mholder.name = mholder.files.item(0).name
+                                mholder.style.display = "none"
+                                mholder.createEvent = onchange = function () { return }
+                                //given the mholder id
+                                //get div and this data dom and 
+                                pic.id = 'myfile'
+                                fr.onload = function (e) {
+                                    var th = {};
+                                    console.log("setting file src as dataUrl")
+                                    var dr = e.target.result;
+                                    console.log("setting file src as dataUrl")
+                                    console.log("appending children elements")
+                                    th[i] = dr
+                                    console.log(th)
+                                    f.push(dr)
+                                    nimg.src = dr;
+                                }
+                                fr.onerror = function (e) {
+                                    console.log("found error")
+                                    console.log(e)
+                                } ///get form data
+                                pic.createEvent = onchange = function (e) {
+                                    d()
+                                }
+                                console.log('iiiiiiiiiiiiiiiiiiiiiiiiii')
+                                console.log('till the end')
+                            } else {
+                                console.log("unknown error")
+                            }
+                        }
+                    }
+                    function removeselect(divid, fileid) {
+                        //given this two
+                        //get main list div and remove div id
+                        //get inp div and remove fileid
+                        console.log(divid)
+                        console.log(fileid)
+                        var ind = document.getElementById('myinp')
+                        var md = document.getElementById('mydiv')
+                        if (ind && md) {
+                            console.log('got both div');
+                            console.log(ind);
+                            console.log(md);
+
+                            var did = document.getElementById(divid);
+                            var fid = document.getElementById(fileid);
+
+                            console.log(did);
+                            console.log(fid);
+
+                            if (did && fid) {
+                                console.log("removing");
+                                ind.removeChild(fid)
+                                md.removeChild(did)
+                                console.log('removed success');
+                            }
+                            else {
+                                console.log('no file|| div');
+                            }
+                        }
+                        else {
+                            console.log('did not get any div');
+                        }
+                    }
+                </script>
+                <script>
+                    var nex = document.getElementById("nex")
+                    var prev = document.getElementById("prev")
+                    var pi;
+                    var ni;
+                    var mylist;
+
+                    function jh() {
+                        //  var b = document.getElementById('mybtn')
+                        var c = document.getElementById('myadd')
+                        var e = document.getElementById('myadddiv')
+                        var f = document.getElementById('albdiv')
+                        var g = document.getElementById('myall')
+                        var a = document.getElementById('mylist')
+                        if (g) {
+                            if (g.style.display === "none") {
+                                console.log("g.style.display === none")
+                                g.style.display = 'block'
+                                //    b.style.display = 'none'
+                                c.style.display = 'none'
+                                e.style.display = 'none'
+                                f.style.display = 'none'
+                                a.style.display = 'none'
+                            }
+                            if (g.style.display === "") {
+                                console.log("g.style.display ===")
+                                g.style.display = 'block'
+                                //      b.style.display = 'none'
+                                c.style.display = 'none'
+                                e.style.display = 'none'
+                                f.style.display = 'none'
+                                a.style.display = 'none'
+                            }
+                            if (g.style.display === "block") {
+                                console.log("g.style.display ===block")
+                                g.style.display = 'block'
+                                //    b.style.display = 'none'
+                                c.style.display = 'none'
+                                e.style.display = 'none'
+                                f.style.display = 'none'
+                                a.style.display = 'none'
+                            }
+                        }
+                    }
+
+                    function view(id, list) {
+                        mylist = list
+                        console.log("in view")
+                        var myframe;
+                        myframe = document.getElementById("myframe")
+                        if (myframe) {
+                            console.log("in myframe")
+                            jh()
+                            myframe.src = v
+                        }
+                        var ls = list.length - 1
+                        console.log(id)
+                        console.log(list)
+                        var nex = document.getElementById("nex")
+                        var prev = document.getElementById("prev")
+                        var viewpage = document.getElementById("viewpage")
+                        var myall = document.getElementById("viewpage")
+                        console.log("after loop")
+                        viewpage.style.display = 'initial'
+                        var v = "http://127.0.0.1:8080/photov/" + id
+
+                        if (myframe) {
+                            console.log("already has fram")
+                            myframe.src = v
+                        } else {
+                            console.log("creating myframe")
+                            frame = document.createElement("iframe")
+                            frame.style = "height:770px;width:100%;"
+                            frame.id = "myframe"
+                            frame.className = "col-12"
+                            //link to preview page +image id
+                            var sos = "http://127.0.0.1:8080/photo/id=id"
+
+                            console.log(v)
+                            console.log("frame source")
+                            console.log(frame.src)
+                            viewpage.appendChild(frame)
+                            frame.src = v
+                            console.log("source added")
+                            viewpage.display = "block"
+                        }
+                        //create iframe
+                        //gets its index on list to set next and prev
+                        for (var i = 0; i < list.length; i++) {
+                            console.log(i)
+                            var hold = list[i]
+                            if (hold["Id"] === id) {
+                                if (i === 0) {
+                                    //no prev 
+                                    console.log("first image")
+                                    console.log(i)
+                                    console.log(list.length);
+                                    if (list.length === 1) {
+                                        prev.style.display = "none"
+                                        nex.style.display = "none"
+                                    }
+                                    else {
+                                        var n = 0;
+                                        n = i + 1
+                                        var nn = list[n]
+                                        ni = nn["Id"]
+                                        console.log(ni)
+                                        var tdd = document.getElementById("mylabel")
+                                        if (tdd) {
+                                            console.log("this is tdd id")
+                                            tdd.className = "col-9"
+                                        }
+                                        prev.style.display = "none"
+                                        nex.style.display = "block"
+                                    }
+                                    break;
+                                } else if (i === ls) {
+                                    console.log("last image")
+                                    //no next
+                                    console.log(i)
+                                    nex.style.display = "none"
+                                    var p = 0;
+                                    p = i - 1;
+                                    pp = list[p]
+                                    pi = pp["Id"]
+                                    console.log(pi)
+                                    var tdd = document.getElementById("mylabel")
+                                    console.log("tddd somting");
+                                    prev.style.display = "block"
+                                    console.log(tdd);
+                                    if (tdd) {
+                                        console.log("this is tdd id")
+                                        tdd.className = "col-9"
+                                    }
+                                    break;
+                                } else {
+                                    console.log('in else')
+                                    console.log(i)
+                                    p = i - 1;
+                                    n = i + 1;
+                                    nn = list[n]
+                                    console.log(nn)
+                                    ni = nn["Id"]
+                                    console.log(ni)
+                                    pp = list[p]
+                                    pi = pp["Id"]
+                                    console.log(pp)
+                                    console.log(pi)
+                                    prev.style.display = "initial"
+                                    nex.style.display = "initial"
+                                    console.log(i)
+                                    var tdd = document.getElementById("mylabel")
+                                    if (tdd) {
+                                        console.log("this is tdd id")
+                                        tdd.className = "col-7"
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    nex.addEventListener('click', function () {
+                        console.log("clicking next")
+                        console.log(mylist, ni)
+                        view(ni, mylist)
+                    })
+                    prev.addEventListener('click', function () {
+                        console.log("clicking pev")
+                        view(pi, mylist)
+                        console.log(pi, mylist)
+                    })
+                </script>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

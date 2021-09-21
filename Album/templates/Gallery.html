@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Saved</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/static/js/jquery.min.js"></script>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <script src="/static/js/socket.io.js"></script>
+
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <script src="/static/js/socket.io.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/bootstrap.bundle.js"></script>
+
+
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+</head>
+
+<body class="container">
+    <div class="row nav navbar" name="navbar">
+        <a href="{{url_for('home')}}" class="col-2">HOME</a>
+
+        <a href="{{url_for('timeline')}}" class="col-2">Timeline</a>
+        <a href="{{url_for('gallery')}}" class="col-2">Gallery</a>
+        <a href="{{url_for('aboutus')}}" class="col-2">About us</a>
+        <a href="{{url_for('myprofile')}}" class="col-2">Profile</a>
+    </div>
+    <div class="row">
+        <p class="col-12" style="text-align: center;font-size: 30px">OUR CHURCH EVENTS GALLERY</p>
+    </div>
+    <div class="row">
+        <span class="col-10"></span>
+        <button id="mybtn" class="col-2 btn btn-primary" onClick="showal()" style="text-align:center;height:fit-content">
+                Create new Album
+            </p>
+        </div>
+        <script>
+             sio = io.connect(namespace = "/gallery")
+
+
+             sio.on("managealbum",function(data){
+                 console.log("got manage data")
+                 console.log(data)
+                 //get album div change name,date//get labels
+                 if (data) {
+                    if (data['Type'] === 'Edit') {
+                        var t="myevent"+data['Album']
+                        var v="mydate"+data['Album']
+                        var ev = document.getElementById(t)
+                        var ed = document.getElementById(v)
+                        console.log(t)
+                        console.log(v)
+                        console.log(ev)
+                        console.log(ed)
+
+                        if (ev  && ed) {
+                            console.log("got nodes")
+                            ev.innerText = data['Event']
+                            ed.innerText = data['Date']
+                            console.log("data updated")
+                        }
+                    }
+                 }
+             })
+            function showal(){
+                var a=document.getElementById('myform')
+                var b=document.getElementById('mybtn')
+                console.log(a)
+                console.log(b)
+                if (a){
+                    if(a.style.display==="none"){
+                        a.style.display='block'
+                    b.style.display='none'
+                    }
+                    else if(a.style.display===""){
+                        a.style.display='block'
+                    }
+                    else if(a.style.display==="block"){
+                        a.style.display='none'
+                        b.style.display='block'
+                    }
+                    else{
+                        b.style.display='block'
+                        a.style.display='none'
+                    }
+                }
+            }
+
+                function myff() {
+                //action="{{url_for('editAlbum')}}"
+                //method="GET"
+                console.log("in this")
+
+                var ev = document.getElementById("event")
+                var ven = document.getElementById("venue")
+                var ed = document.getElementById("date")
+                var des = document.getElementById("desc")
+
+                if (ev && ven && ed && des) {
+                    console.log("got this nodes")
+                    event = ev.value;
+                    venue = ven.value;
+                    eventd = ed.value;
+                    desc = des.value;
+
+                    //sio emit
+                    data = {
+                        'Event': event,
+                        'Venue': venue,
+                        'Date': eventd,
+                        'Desc': desc,
+                        'Type': 'Create',
+
+
+                    }
+                    console.log(data)
+                    sio.emit("managealbums", data)
+                    console.log("emmited")
+                }
+            }
+        </script>
+        <div
+            class="row border"
+            method="GET"
+            action="{{url_for('createalbum')}}"
+            id="myform"
+            style="margin:auto;width:50%;margin-bottom:5px;display:none;border-radius:15px"
+        >
+            <p class="col-12" style="text-align:center;margin:auto;font-size: 20px;margin-bottom:5px;">Create new album</p>
+            <input
+                class="col-10 form-control"
+                style="text-align:center;margin:auto;margin-bottom:5px;"
+                required
+                type="text"
+                id="event"
+                name="event"
+                placeholder="Event "
+            >
+            <input
+                class="col-10 form-control"
+                style="text-align:center;margin:auto;margin-bottom:5px;"
+                required
+                type="text"
+                id="venue"
+                name="venue"
+                placeholder="Venue "
+            >
+            <input
+                class="col-10 form-control"
+                style="text-align:center;margin:auto;margin-bottom:5px;"
+                required
+                type="date"
+                id="date"
+                name="date"
+                style="margin:auto; "
+            >
+            <textarea
+                class="col-10 form-control"
+                style="text-align:center;margin:auto;height:80px;margin-bottom:5px;"
+                id="desc"
+                required
+                type="text "
+                name="desc"
+                placeholder="Describe moment"
+            ></textarea>
+            <span class="col-2"></span>
+            <span class="col-2"></span>
+            <span class="col-7"></span>
+            <button
+                style="text-align:center;margin:auto;"
+                class="col-3 btn btn-primary"
+                type="reset"
+                name="reset"
+                onclick="showal()"
+            >Cancel</button>
+        <span class="col-2"></span>
+        <button style="text-align:center;margin:auto;" onclick="myff()" class="col-3 btn btn-primary">Submit</button>
+    </div>
+    <script>
+        function createalbum() {
+            //get data
+        }
+        var myf = document.getElementById("myform")
+        console.log("my form")
+        console.log(myf)
+        myf.onsubmit = function(e) {
+            var v = document.getElementById("event")
+            console.log(v)
+            var e = document.getElementById("event")
+            console.log(e)
+            var d = document.getElementById("date")
+            console.log(d)
+            var desc = document.getElementById("desc")
+            console.log(desc)
+            if (v.value == "") {
+                return false
+            } else if (e.value == "") {
+                return false
+            } else if (d.value == "") {
+                return false
+            } else if (desc.value == "") {
+                return false
+            } else {
+                return true
+            }
+        }
+    </script>
+    <div class="row " id="myalbums">
+        {% if mydata %} {% for my in mydata%}
+        <div class="border" style="margin:3px;height:210px;width:156px;border-radius:7px;justify-content:center">
+            <a id="{{my['Id']}}" class="row" style="justify-content:center">
+                <input class=" border" id="mydp{{my['Id']}}" type="file" src="/static/Images/Icons/men.png" style="height:20px;width:20px;position:absolute;margin-left:70px" onchange="cover({{my['Id']}})">
+                <img class="border" id="dp{{my['Id']}}" style="height:150px;border-radius:75px;width:150px;margin:5px;justify-content:center;display:block" src="/static/Images/DP/{{my['Cover']}}" height="120px">
+                <a href="{{url_for('preview',id=my['Id'])}}" class="col-12" id="myevent{{my['Id']}}" style="font-size: 15px;justify-content:center;margin:auto;text-align:center;height:20px;width:fit-content;word-break:break-all;overflow:hidden;position:relative;left:auto;top:auto;align-content:center">
+                    {{my['Event']}}
+            </a>
+                <label class="col-12" id="mydate{{my['Id']}}" style="text-align:left;position:relative;font-size: 17px;height:20px">
+                        {{my['EventDate']}}
+                    </label>
+            </a>
+        </div>
+        {% endfor%} {% endif %}
+    </div>
+    <script>
+        function cover(id) {
+            console.log('changing cover');
+            console.log(id);
+            //get file
+            //var f = document.createElement('input');
+            //f.type = "file";
+            di = "mydp" + id;
+            console.log(di);
+            var f = document.getElementById(di);
+            console.log(f.files);
+            var pp = "dp" + id
+            var dip = document.getElementById(pp)
+            console.log(pp);
+
+
+
+
+            //check if file is image
+            if (f && f.files.length > 0) {
+                console.log('got files');
+
+                var fi = f.files.item(0)
+                console.log(fi);
+                if (fi) {
+                    console.log('got files');
+
+                    var t = fi.type
+                    console.log(t);
+                    var yt = t.search('/')
+                    console.log(yt)
+                    var tt = t.slice(0, yt)
+                    console.log(tt)
+
+                    var n = fi.name
+
+                    if (tt === 'image') {
+                        console.log('got image');
+                        var nr = new FileReader()
+                        nr.readAsDataURL(fi)
+
+                        nr.onload = function(y) {
+                            var dr = y.target.result;
+                            console.log('got target.result');
+                            console.log(dip);
+
+                            dip.src = dr
+
+                            //sio.emit
+                            data = {
+                                "Id": id,
+                                "File": fi,
+                                "Type": "Edit",
+                                "Name": n,
+
+
+                            }
+
+
+                            console.log(data);
+                            sio.emit("albumcover", data)
+                            console.log('emited');
+
+
+
+
+                        }
+
+                    }
+
+
+
+
+                }
+
+
+            }
+
+
+
+
+            //    if (id) {
+            //         var dp = "dp" + id
+            //         var mydp = document.getElementById(dp)
+            //         if (dp) {
+
+            //          }
+            //      }
+
+
+
+        }
+        sio.on("albumcover", function(x) {
+            console.log('got data');
+            console.log(x);
+            //get album dp image and change src
+            var d = "dp" + x['Id']
+            console.log(d);
+            var dp = document.getElementById(d)
+            console.log(dp);
+
+            if (dp) {
+                console.log('cover pic');
+                var s = "/static/Images/DP/" + x['File']
+                console.log(s);
+
+                dp.src = s
+
+
+            }
+
+
+
+        })
+
+
+        sio.on("newalbum", function(data) {
+
+            console.log("got manage data")
+            console.log(data)
+            var myal = document.getElementById("myalbums")
+                //create new div
+            var mdiv = document.createElement('div')
+            mdiv.className = "col-3 "
+            mdiv.style = "margin-bottom:10px;margin-top:10px;height:fit-content "
+
+            //create pic
+            var pi = document.createElement('img')
+            pi.className = "col-12"
+
+            pi.src = "/static/angry-raging-white-tiger.jpg"
+            pi.style = "height:120px"
+
+
+            //create event label
+
+            var el = document.createElement('p')
+            el.className = "col-12"
+            el.innerText = data['Event']
+            el.style = "font-size: 25px;margin:auto;text-align:center;height:fit-content;width:fit-content;"
+            el.href = ""
+
+
+            //create date label
+            var dl = document.createElement('label')
+            dl.className = "col-12"
+            dl.style = "text-align: center;"
+            dl.innerText = data['Date']
+
+
+            //a link
+
+            var al = document.createElement('a')
+            al.className = "row"
+
+            if (myal) {
+
+                al.appendChild(pi)
+                al.appendChild(el)
+                al.appendChild(dl)
+                mdiv.appendChild(al)
+                myal.prepend(mdiv)
+
+            }
+
+        })
+    </script>
+</body>
+
+</html>

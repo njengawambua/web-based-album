@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Saved</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/static/js/jquery.min.js"></script>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <script src="/static/js/socket.io.js"></script>
+
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <script src="/static/js/socket.io.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/bootstrap.bundle.js"></script>
+
+
+
+   
+    <script>
+        //make connection
+
+        var sio = io.connect(namespace = "/viewphoto")
+        sio.on("connect", function (e) {
+            console.log('connected')
+
+        })
+
+        sio.on("commentor", function (data) {
+            console.log('got commentor data');
+            console.log(data);
+            //get dp+commentid and name+commentid
+            var dp = "dp" + data['CommentId']
+            var n = "name" + data['CommentId']
+            console.log(dp);
+            console.log(n);
+            var mydp = document.getElementById(dp)
+            var name = document.getElementById(n)
+            console.log(mydp);
+            console.log(name);
+
+            if (mydp) {
+                var x = "/static/images/DP/" + data['DP']
+
+                mydp.src = '/static/Images/Icons/church.jpg'
+            }
+            if (name) {
+                name.style.backgroundColor = ''
+                name.innerText = data['Username']
+            }
+
+
+
+
+
+        })
+
+        sio.on("myphoto", function (data) {
+            console.log('got myphoto');
+            console.log(data);
+            if (data['Type'] === 'Update') {
+                var p = document.getElementById("photodiv")
+                var d = document.getElementById("mdesc")
+                console.log(p);
+                console.log(d);
+                if (data['Mimetype'] === 'audio' || data['Mimetype'] === 'video') {
+                    console.log("got video");
+                    ss = document.createElement('video')
+                    ss.poster = "/static/Images/angry-raging-white-tiger.jpg"
+                    ss.className = "col-lg-9 col-sm-10 col-md-10 col-12 g-0 p-0"
+                    ss.id = "mphoto"
+                    ss.src = "/static/Images/EventPictures/" + data['Name']
+                    console.log(ss.src);
+                    ss.style = "border-radius: 2px;margin:auto;margin-bottom:10px;display:block;width:100%;height:380px;margin:auto"
+                    ss.controls = true;
+                    ss.preload = "true"
+
+
+                }
+                else if (data['Mimetype'] === 'image') {
+                    console.log("got image");
+                    ss = document.createElement('img')
+                    ss.className = "col-lg-5 col-sm-10 col-md-10 col-12 g-0 p-0 border"
+                    ss.id = "mphoto"
+                    ss.src = "/static/Images/EventPictures/" + data['Name']
+                    ss.style = "border-radius: 15px;margin:auto;margin-bottom:10px;display:block;height:380px;margin:auto;width:auto"
+                    //  ss.controls = true;
+                    //ss.preload = true
+                    //ss.poster = "/static/Images/angry-raging-white-tiger.jpg"
+
+                }
+                else {
+                    console.log("did not get mimetype");
+                }
+
+
+                if (ss && d && p) {
+                    console.log("appending");
+                    p.prepend(ss)
+                    if (data['Desc'] === '') {
+                        d.innerText = "Describe This Moment"
+                    } else {
+                        d.innerText = data['Desc']
+                    }
+                    var fl = document.getElementById('flagtag')
+                    if (data['Flagged'] === 'True' && fl) {
+                        console.log('got flagged');
+                        fl.style.display = 'block'
+                        fl.innerText = 'This photo has been Flagged'
+                    }
+                }
+                else {
+                    console.log("failed to nodes");
+                }
+            }
+            if (data['Type'] === 'NoData') {
+                console.log('got no data');
+                console.log('hidding evrything else');
+                var cmd = "hide"
+                id = "removedphoto"
+                var md = document.getElementById("removephoto")
+                var fl = document.getElementById('flagtag')
+                if (md && fl) {
+                    md.style.display = 'none'
+                    fl.style.display = 'none'
+                }
+                tevert(cmd, id)
+
+            }
+
+        })
+
+        function dd(id) {
+            console.log("joined")
+            console.log(id)
+            sio.emit("joinphoto", id)
+            console.log("emmited")
+        }
+
+        function ef() {
+            var d = document.getElementById("myin")
+            var t = d.value;
+            console.log("got value")
+            console.log(t)
+            if (!t == "") {
+                sio.emit("photocomment", t)
+                console.log("emmited")
+                d.value = ""
+                d.style.height="27px"
+            }
+        }
+        sio.on("mycomment", function (e) {
+            console.log("got message")
+            console.log(e)
+            console.log('got id');
+            console.log(e['Id']);
+            var commid = e['Id']
+            var myc = document.getElementById("mycomms")
+
+            var ss = document.createElement("div");
+            ss.className = "col-lg-1 col-sm-2 col-md-2 col-2 g-0 p-0 "
+            ss.style = "marging:auto;width:100%;overflow:hidden;height:min-content"
+
+
+            var myme = document.createElement('img')
+            //myme.type = "image"
+            myme.className = "border mr-0 ml-auto"
+            myme.src = '/static/Images/Icons/men.png'
+            myme.style = "height:20px;width:20px;float:right"
+            myme.id = "menu" + commid
+            myme.addEventListener('click', function (e) {
+                console.log('clicking toggle menu');
+                console.log(commid);
+                mod(commid)
+            });
+
+            var ndd = document.createElement('div')
+            ndd.className = 'row  bg-light border m-0 g-0 p-0'
+
+            ndd.style = 'height:max-content;width:auto;display:inline'
+
+            var nda = document.createElement('div')
+            nda.className = 'col-lg-12 col-sm-12 col-md-12 col-12 bg-light border g-0 p-0 m-0'
+
+            nda.style = 'display:inline'
+            // console.log(ndd.id)
+            //ndd.appendChild(myme)
+
+
+            var mend = document.createElement("div")
+            mend.className = "row  g-0 p-0 mb-0"
+            mend.id = "edit" + commid
+            mend.style = "margin:auto;margin-left:45%;height:fit-content;display:none;width:max-content;position:absolute;overflow:hidden;font-size:small;margin-top:5px;z-index:2"
+
+            var rlabel = document.createElement('label')
+            rlabel.className = "col-lg-12 col-sm-12 col-md-12 col-12 border g-0 p-0"
+            rlabel.innerText = "Remove"
+            rlabel.style = "margin:0px;text-align:center"
+            rlabel.addEventListener('click', function (e) {
+                console.log("clicking remove")
+                console.log(commid);
+                removec(commid)
+            })
+
+            var elabel = document.createElement('label')
+            elabel.className = "col-lg-12 col-sm-12 col-md-12 col-12 border g-0 p-0"
+            elabel.innerText = "Edit"
+            elabel.style = "margin:0px;text-align:center"
+            elabel.addEventListener('click', function (e) {
+                console.log("clicking edit")
+                console.log(commid);
+                editc(commid)
+            })
+
+            var flabel = document.createElement('label')
+            flabel.className = "col-lg-12 col-sm-12 col-md-12 col-12 border g-0 p-0"
+            flabel.innerText = "Flag"
+            flabel.style = "margin:0px;text-align:center"
+            flabel.addEventListener('click', function (e) {
+                console.log("clicking flag");
+                console.log(commid);
+                flagc(commid)
+            })
+
+
+            mend.appendChild(rlabel)
+            mend.appendChild(elabel)
+            mend.appendChild(flabel)
+            //ss.appendChild(myme)
+            //ss.appendChild(mend)
+
+            var fp = document.createElement('p')
+            fp.className = "col-lg-12 col-sm-12 col-md-12 col-12 g-0 p-0"
+            fp.id = "flag"
+            fp.style = "color:red;margin:auto;word-break:break-all;border-radius:15px;position:relative;margin-top:3px;height:fit-content;display:block;text-align:right;font-size:12px"
+            fp.id = "flag" + commid
+
+
+            var myimg = document.createElement('img')
+            myimg.className = "rounded border g-0 p-0 mr-0 ml-0 mt-0 col-2 col-lg-1 col-sm-1 col-md-1"
+            myimg.src = "/static/Images/Icons/men.png"
+            myimg.style = "diplay:inline;height:50px"
+            myimg.id = "dp" + e['Id']
+
+            var ts = document.createElement('div')
+            ts.className = e['Comment'] + " row border g-0 p-0 ml-0 mr-0 mt-0 mb-1 "
+            ts.style = "margin-top:0px;width:100%;background-color:white;margin-bottom:0px;height:fit-content;margin:auto;overflow-x:hidden;border-radius:3px;display:flex"
+            ts.id = commid
+
+            var tas = document.createElement('div')
+            tas.className = "col-lg-11 col-sm-11 col-md-11 col-10 g-0 p-0 mr-0 mt-0 mb-2 border ml-0 mr-0"
+            tas.style = "width:100%;font-size:15px;"
+            tas.id = "comd" + commid
+
+
+            var lt = document.createElement('label')
+            lt.className = "col-sm-8 col-md-8 g-0 p-0 col-lg-8 col-8 ml-0 mb-0 "
+            lt.id = "name" + e['Id']
+            lt.style = "height:25px;width:100%;margin-right:0px;overflow:hidden;background-color:brown;margin-bottom:0px;text-align:left;margin:auto;font-size:13px"
+
+            var tl = document.createElement('label')
+            tl.className = "col-lg-3 col-md-3 g-0 p-0 col-sm-3 col-3 mb-0 "
+            tl.innerText = e['Date']
+            tl.style = "overflow:hidden;height:20px;margin-right:0px;height:25px;margin-bottom:0px;text-align:right;font-size:13px"
+
+            var tx = document.createElement('p')
+            tx.className = "col-lg-12 col-sm-12 col-md-12 col-12  g-0 p-0 mt-0 mr-0"
+            tx.style = "height:max-content;word-break:break-all;overflow:auto;margin-top:0px;margin-bottom:0px;margin:auto;float:right"
+            tx.id = "comment" + commid
+            tx.name = e['Id']
+            tx.innerText = e['Comment']
+            console.log(tx)
+
+            myc.prepend(nda)
+            nda.appendChild(ts)
+            //ts.appendChild(tas)
+            ts.appendChild(myimg)
+
+            tas.appendChild(ndd)
+            ts.appendChild(tas)         
+            ndd.appendChild(lt)
+            ndd.appendChild(tl)
+            ndd.appendChild(myme)
+            ndd.appendChild(tx)
+            ndd.appendChild(fp)
+           // ndd.appendChild(ss)
+            ts.appendChild(mend)
+
+            
+            // ts.appendChild(mend)
+
+            
+            ts.style.height = "max-content"
+
+            var mc = document.getElementById("mycomms")
+            if (mc) {
+                console.log(mc.children.length)
+                if (mc.children.length > 1) {
+                    console.log("got children")
+                    var u = document.getElementById("inc")
+                    if (u) {
+                        console.log(u)
+                        mc.removeChild(u)
+                    }
+                }
+            }
+            
+            var rd=document.getElementById("comcount")
+            if(rd){
+                console.log(rd);
+                console.log("got comm link");
+                console.log(rd.value);
+                if(rd.value===''){
+                    console.log('got empty str');
+                    rd.value=1
+                    rd.innerText="comments "+1
+                }
+                else{
+                    console.log(rd.value);
+                    let g=Number(rd.value)
+                    rd.value=g+1
+                    console.log('new');
+                    console.log(rd.value);
+                    console.log("not null value");
+                    rd.value=g+1
+                    rd.innerText="comments "+(g+1)
+                }
+            }
+            else{
+                console.log("no rd");
+            }
+        })
+
+        sio.on("Editcomment", function (data) {
+            console.log(data)
+            var id = data['Id']
+            console.log(id)
+            if (id) {
+                var mid = "comment" + id
+                console.log(mid)
+                var pp = document.getElementById(mid)
+                if (pp) {
+                    pp.innerText = data['Comment']
+                    console.log("commented")
+                }
+            }
+        })
+        sio.on("Removecomment", function (data) {
+            console.log(data)
+            //get div with comm or straight to comment it self
+            var id = data['Id']
+            console.log(id)
+            var p = document.getElementById("mycomms")
+            console.log(p)
+            var pp = document.getElementById(id)
+            console.log(pp)
+            if (pp) {
+                p.removeChild(pp)
+                console.log("removed")
+            } else {
+                console.log("already removed")
+            }
+        })
+        sio.on("Flagcomment", function (data) {
+            console.log(data)
+            if (data['Id']) {
+                var d = "flag" + data['Id']
+                var t = document.getElementById(d)
+                if (t) {
+                    t.innerText = 'This Comment Has Been Flaged'
+                }
+            }
+        })
+    </script>
+    <script>
+        function br2nl(str) {
+            return str.replace(/<br\s*\/?>/mg, "\n");
+        }
+
+        function moddesc(id) {
+            //given id
+            console.log(id)
+            var s = "mdesc"
+            var editvalue = document.getElementById(s)
+            var mf = document.getElementById("myform")
+            var f = document.getElementById("edittag")
+
+            var nedit = document.getElementById("descedit")
+            console.log(editvalue)
+            console.log(nedit)
+            if (mf) {
+                mf.style.display = 'block'
+                if (editvalue) {
+
+                    if (nedit) {
+                        if (editvalue.innerText === "Describe this moment") {
+                            if (f) {
+                                f.innerText = "Add Photo Description"
+                                editvalue.style.display = "none"
+                                console.log(nedit.value)
+                            }
+                        } else {
+                            editvalue.style.display = "none"
+                            nedit.style.whiteSpace = "pre-wrap"
+                            var t = br2nl(editvalue.innerHTML)
+                            if (t) {
+                                console.log("changed br to nl");
+                                nedit.value = t
+                                console.log(t);
+                                console.log(nedit.scrollHeight);
+                                nedit.style.height = nedit.scrollHeight + "px";
+                            }
+                            else {
+                                console.log("unable to change br to nl");
+                                nedit.value = editvalue.innerText
+                                console.log(nedit.scrollHeight);
+                                nedit.style.height = nedit.scrollHeight + "px";
+                            }
+
+                            console.log(nedit.value)
+                        }
+                    }
+                }
+            }
+        }
+
+        function canceledit(id, pr) {
+            //return
+            console.log(pr)
+            var nedit = document.getElementById("descedit")
+            console.log(nedit)
+
+            var s = "mdesc"
+            console.log(nedit.value)
+            var editvalue = document.getElementById(s)
+            var mf = document.getElementById("myform")
+            var t = "descedit"
+            var c = document.getElementById(t)
+            console.log(c)
+
+            if (editvalue) {
+                if (nedit) {
+                    if (mf) {
+                        if (pr === 'submit') {
+                            console.log("got submit")
+                            editvalue.innerText = nedit.value;
+                            editvalue.style.display = "block"
+                            mf.style.display = "none"
+                            c.style.display = "block"
+
+                            var data = {
+                                "Type": "Edit",
+                                "Id": id,
+                                "Desc": nedit.value,
+                            }
+                            sio.emit("Managephoto", data)
+                            console.log("emitted")
+                        } else if (pr === 'cancel') {
+                            console.log("got cancel")
+                            editvalue.style.display = "block"
+                            mf.style.display = "none"
+                            c.style.display = "block"
+                        } else {
+                            editvalue.style.display = "block"
+                            mf.style.display = "none"
+                            c.style.display = "block"
+                        }
+
+                    };
+                }
+            }
+        }
+
+        sio.on("Managephoto", function (data) {
+            console.log("got desc edit")
+            console.log(data)
+
+        })
+    </script>
+</head>
+
+<body class="container-fluid g-0 p-0 "
+    style="width:100%;font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;font-size: 18px;overflow-y:auto;margin:auto;height: 100%;"
+    onload="dd({{id}})">
+    <div class="row g-0 p-0" style="width:100%;margin: auto;height:100%;">
+        <div class="col-md-12 col-sm-12 col-lg-9 col-12 g-0 p-0" style="width: 100%;margin: auto;">
+            <div class="row shadow rounded bg-light" id="removephoto"
+                style="margin:auto;border-radius: 15px;width:70%;height:200px;background-color:red;display:none;justify-content:center;position: absolute;margin-left: 13%;margin-top: 10%;">
+                <p class="col-lg-12 col-sm-12 col-md-12 col-12 border"
+                    style="text-align: center;height:30px;font-size:20px">Delete Photo</p>
+
+                <div class="row" style="display:flex;justify-content:center;height:40px;margin-top:5%">
+                    <p class="col-lg-12 col-sm-12 col-md-12 col-12 "
+                        style="text-align: center;height:30px;font-size:20px;color:red;">Are you sure?
+                    </p>
+                    <button class="border col-lg-2 col-sm-2 col-md-2 col-2 btn btn-primary"
+                        onclick="canceldelete('removephoto')" style="margin:3px">Keep</button>
+                    <button class="border col-lg-2 col-sm-2 col-md-2 col-2 btn btn-primary"
+                        onclick="photodelete({{id}})" style="margin:3px">Remove</button>
+                </div>
+            </div>
+            <div class="row shadow rounded bg-light" id="flagphoto"
+                style="margin:auto;border-radius: 15px;width:70%;height:200px;background-color:red;display:none;justify-content:center;position: absolute;margin-left: 13%;margin-top: 10%">
+                <p class="col-lg-12 col-sm-12 col-md-12 col-12 border"
+                    style="text-align:center;height:30px;font-size:20px;margin-top:10px">Flag Photo
+                </p>
+                <textarea class="col-lg-9 col-sm-9 col-md-9 col-9 border g-1 p-1 form-control mb-2" id='flagreason'
+                    style="margin:auto;height:max-content;margin-top:3%" placeholder="Reason for Flagging"></textarea>
+                <div class="row" style="margin-bottom:14px;justify-content:center;height:40px;display:flex">
+                    <button class="border col-lg-2 col-sm-2 col-md-2 col-2 btn btn-primary form-control"
+                        style="margin:3px" onclick="cancelflag('flagphoto')">Cancel</button>
+                    <button class="border col-lg-2 col-sm-2 col-md-2 col-2  btn btn-primary form-control"
+                        style="margin:3px" onclick="photoflag({{id}})">Flag</button>
+                </div>
+            </div>
+
+            <div class="row shadow rounded bg-light" id="removedphoto"
+                style="margin:auto;border-radius: 15px;width:90%;height:700px;background-color:white;display:none;justify-content:center">
+                <img class="col-lg-12 col-sm-12 col-md-12 col-12 border" src="/static/Images/Icons/rm.png">
+
+            </div>
+
+            <div class="row  g-0 p-0 mt-2 " style="margin: auto;width:100%;height:380px;display:block">
+                <div class="col-lg-12 col-12 col-sm-12 col-md-12 g-0 p-0 " style="width:100%;margin: auto;float: left;">
+                    <div class="row g-0 p-0 border " id="photodiv" style="width:100%;margin: auto;">
+                    </div>
+                </div>
+
+                <div class="col-lg-1 col-1 col-sm-1 col-md-1 border g-0 p-0 mt-0 mb-auto mr-0 ml-auto"
+                    style="margin:auto;width: 100%;z-index: 2;float:right;margin-top: 0px;position: absolute;left:92%;height: fit-content;">
+                    <div class="row g-0 p-0 border" style="width:100%;margin: auto;float: right;">
+                        <img id="opt" class="mt-0 border mr-0 ml-auto"
+                            src='/static/Images/Icons/men.png' style="width:15px;margin: auto;height:20px;float: left;"
+                            onclick="tmenu()">
+                        <!--
+                        <div class="row g-0 p-0" id="menu"
+                            style="margin-left:auto;margin-right:0px;height:fit-content;display:none;align-content: flex-start;width: auto;">
+                            <label class="col-lg-12 col-sm-12 col-md-12 col-12  border"
+                                onclick="photoremove('removephoto')" style="margin:0px;height:fit-content">
+                                remove</label>
+                            <label class="col-lg-12 col-sm-12 col-md-12 col-12  border"
+                                onclick="flagphoto('flagphoto')">flag</label>
+                        </div>  
+                     -->
+                    </div>
+
+                </div>
+
+
+                <div class="row bg-light p-2 g-2" id="menu"
+                    style="display:none;position:absolute;width:100%;">
+                    <div class="col-12 col-lg-8 col-sm-12 col-md-12 m-auto"  >
+                        <div class="row  border" style="margin-top: 10vh;">
+                            <label class="btn btn-primary g-2 p-2 m-2 col-1 ml-auto mr-1"
+                            style="float:right;height: min-content;width: max-content;">X</label>
+                        <label class="col-lg-12 col-sm-12 col-md-12 col-12  border" onclick="photoremove('removephoto')"
+                            style="margin:0px;height:fit-content;text-align: center;float: left;">
+                            remove</label>
+                        <label class="col-lg-12 col-sm-12 col-md-12 col-12 mt-1 border" onclick="flagphoto('flagphoto')"
+                            style="text-align: center;float: left;">flag</label>
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+            <p class="col-lg-12 col-sm-12 col-md-12 col-12" id='flagtag'
+                style="text-align:right;color:red;font-size:12px;display:none">This Photo has
+                been
+                Flagged</p>
+            <div class=" row rounded bg-light mb-3 mt-2 border" id="photodescdiv"
+                style="margin-bottom:10px;width:100%;margin:auto;border-radius:10px;height:fit-content;position:relative;display:flex">
+                <p class="col-10 p-0 g-0 " id="mdesc"
+                    style="margin: auto;word-break:break-all;width:100px;height: fit-content;">
+                </p>
+                <span class="col-lg-12 col-sm-12 col-md-12 col-12"></span>
+                <img class="border" src='/static/Images/Icons/men.png'
+                    style="height:15px;float: right;position:absolute;left:98%" onclick="moddesc({{id}})">
+                <div class="row form-group shadow-sm bg-light" id="myform" method="GET"
+                    style="width: 100%;margin:auto;display:none;align-content: center;">
+                    <label for="" class="col-lg-6 col-sm-6 col-md-6 col-6 form-label" id="edittag"
+                        style="margin:auto;text-align:center;margin-left:25%">Edit
+                        Description</label>
+                    <textarea type="text" class="col-lg-12 col-sm-12 col-md-12 col-12 form-control mb-2"
+                        oninput="oncc('descedit')" id="descedit" name="desc"
+                        style="height:max-content;border-radius:5px;text-align:center;justify-content:center;margin:auto;overflow:hidden;white-space:pre;"></textarea>
+                    <button type="button" class="col-lg-2 col-sm-2 col-md-2 col-4 mr-2 ml-3 btn btn-primary form-control"
+                        onclick="canceledit({{id}},'cancel')" style="margin: auto;float: right;" name="reset"
+                        value="reset">Cancel</button>
+                    <button type="button" class="col-lg-2 col-sm-2 col-md-2 col-4  btn btn-primary form-control"
+                        onclick="canceledit({{id}},'submit')" style="margin:auto;float: right;"
+                        name="submit">Update</button>
+
+
+                </div>
+            </div>
+
+
+            <script>
+                function senddesc(id) {
+                    //get input value and emit
+                    var inp = document.getElementById();
+                    if (inp) {
+                        //get value
+                        console.log("got input element");
+                        console.log(inp.value());
+                        data = {
+                            "Id": id,
+                            "Desc": inp.value,
+                        }
+                        console.log(data);
+                        sio.emit("editdesc", data)
+
+                    }
+                    else {
+                        console.log("did not get input element");
+                    }
+                }
+
+                sio.on("photomanage", function (data) {
+                    console.log('got data');
+                    console.log(data);
+                    if (data['Type'] === 'Delete') {
+                        console.log(data['Type'])
+                        console.log('got Delete');
+                        //tevert 
+                        var cmd = "hide"
+                        id = "removedphoto"
+                        var md = document.getElementById("removephoto")
+                        if (md) {
+                            md.style.display = 'none'
+                        }
+                        tevert(cmd, id)
+                    }
+                    if (data['Type'] === 'Flag') {
+                        console.log(data['Type'])
+                        console.log('got Flag');
+                        var fl = document.getElementById("flagtag")
+                        if (fl) {
+                            fl.innerText = "This photo has been flagged"
+                            fl.style.display = 'block'
+                        }
+                    }
+                })
+
+                function tmenu() {
+                    console.log("toggling menu")
+                    var mid = "menu"
+                    var men = document.getElementById(mid)
+                    if (men) {
+                        console.log(men);
+                        if (men.style.display === 'none') {
+                            console.log('got none');
+                            men.style.display = 'block'
+                        } else if (men.style.display === 'block') {
+                            console.log('got block');
+                            men.style.display = 'none'
+                        } else if (men.style.display === '') {
+                            console.log('got blank');
+                            men.style.display = 'block'
+                        } else {
+                            console.log('gotelse ');
+                            men.style.display = 'block'
+                        }
+                    }
+                }
+
+                function tevert(cmd, id) {
+                    var a = document.getElementById("newcomment")
+                    var b = document.getElementById("mycomms")
+                    var c = document.getElementById("photodescdiv")
+                    var d = document.getElementById("photodiv")
+                    var t = document.getElementById(id)
+                    console.log(t);
+                    var m = document.getElementById("menu")
+                    if (m) {
+                        console.log(m);
+                        m.style.display = "none";
+                    }
+                    if (cmd === 'hide') {
+                        if (t) {
+                            t.style.display = 'block'
+                            a.style.display = 'none'
+                            b.style.display = 'none'
+                            c.style.display = 'none'
+                            d.style.display = 'none'
+                        }
+                    }
+                    if (cmd === 'show') {
+                        if (t) {
+                            t.style.display = 'none'
+                            a.style.display = 'flex'
+                            b.style.display = 'flex'
+                            c.style.display = 'flex'
+                            d.style.display = 'block'
+                        }
+                    }
+                }
+
+                function photoremove(id) {
+                    console.log('clicking remove photo');
+                    console.log(id);
+                    var cmd = 'hide'
+                    id = id
+                    tevert(cmd, id)
+                }
+
+                function photodelete(photo) {
+                    //
+                    console.log('clicked delete');
+                    console.log(photo);
+                    if (photo) {
+                        var data = {
+                            "Id": photo,
+                            'Type': 'Delete'
+                        }
+                        console.log(data);
+                        sio.emit("Managephoto", data)
+                        console.log("emitted");
+                        console.log('hidding evrything else');
+                        var cmd = "hide"
+                        id = "removedphoto"
+                        var md = document.getElementById("removephoto")
+                        var fl = document.getElementById('flagtag')
+                        if (md && fl) {
+                            md.style.display = 'none'
+                            fl.style.display = 'none'
+                        }
+                        tevert(cmd, id)
+                    }
+                }
+
+                function canceldelete(id) {
+                    console.log(id);
+                    var cmd = 'show'
+                    id = id
+                    tevert(cmd, id)
+                }
+
+                function flagphoto(id) {
+                    console.log('clicking flag photo');
+                    console.log(id);
+                    var cmd = 'hide'
+                    id = id
+                    tevert(cmd, id)
+                }
+
+                function cancelflag(id) {
+                    console.log(id);
+                    var cmd = 'show'
+                    id = id
+                    tevert(cmd, id)
+                }
+
+                function photoflag(photo) {
+                    //got photo details
+                    //emit with command
+                    console.log('clicked flag');
+                    console.log(photo);
+                    var myr = 'flagreason';
+                    var myreason = document.getElementById(myr);
+                    var mrv = myreason.value;
+                    if (photo) {
+                        if (mrv) {
+                            var data = {
+                                "Id": photo,
+                                'Type': 'Flag',
+                                'Reason': mrv
+                            }
+                            console.log(data);
+                            sio.emit("Managephoto", data)
+                            console.log("emitted");
+                        } else {
+                            var data = {
+                                "Id": photo,
+
+                                'Type': 'Flag',
+                                'Reason': '',
+                            }
+                            console.log(data);
+                            sio.emit("Managephoto", data)
+                            console.log("emitted");
+                        }
+                        var cmd = "show"
+                        id = "flagphoto"
+                        var md = document.getElementById("flagtag")
+                        if (md) {
+                            md.style.display = 'block'
+                        }
+                        tevert(cmd, id)
+                    }
+
+                }
+            </script>
+            <script>
+        //var myf = document.getElementById("myform")
+        //  console.log("my form")
+        //  console.log(myf)
+        //  myf.onsubmit = function(e) {
+        //      var v = document.getElementById("desc")
+        //    console.log(v)
+        //  if (v.value =="") {
+        //            return false
+        //      } else {
+        //        return true
+        //  }
+        //   }
+            </script>
+            <script>
+                //make connection
+
+                function ef(id) {
+
+                    console.log(id)
+                    var d = document.getElementById("myin")
+                    var t = d.value;
+                    console.log("got value")
+                    console.log(t)
+                    if (!t == "") {
+                        if (id) {
+                            dd = {}
+                            dd['PhotoId'] = id
+                            dd['Comment'] = t
+                            dd["Type"] = "Create"
+                            console.log(dd);
+                            sio.emit("PhotoComment", dd)
+
+                            console.log("emmited")
+                            d.value = ""
+                            d.style.height="27px"
+                        }
+                    }
+                    d.style.height="27px"
+                }
+            </script>
+            <script>
+                var mc = document.getElementById("mycomms")
+                console.log(mc.children.length)
+
+                if (mc.children.length < 1) {
+                    console.log("no children")
+                    var inc = document.createElement("p")
+                    inc.className = "col-lg-12 col-sm-12 col-md-12 col-12"
+                    inc.id = "inc"
+                    inc.innerText = "Be the first to comment"
+                    mc.appendChild(inc)
+                }
+
+                function nud(er) {
+                    console.log(er)
+                    var vf = document.getElementById(er)
+                    console.log("got message to edit")
+                    console.log(vf)
+                    var ff = document.getElementsByClassName(er)
+                    console.log("got div to edit")
+                    ff.createEvent = onclick = function (e) {
+                        console.log(e)
+                        e.abort
+                    }
+                    vf.style = "display:none"
+                    console.log(ff)
+                    var y = ff.item(0)
+                    console.log(y)
+                    sd = document.createElement('input')
+                    sd.style = "text-indent: 20px;"
+                    sd.className = "col-lg-11 col-sm-11 col-md-11 col-11 form-control"
+                    sd.style = "margin:auto;height:40px"
+                    sd.value = er
+                    sd.name = 'edit'
+                    sp = document.createElement('span')
+                    sp.className = "col-lg-8 col-sm-8 col-md-8 col-8"
+                    fs = document.createElement('button')
+                    fs.name = 'cancel'
+                    fs.value = 'cancel'
+                    fs.style = "text-align:center;margin:auto;"
+                    fs.className = "col-lg-2 col-sm-2 col-md-2 col-2 btn btn-primary"
+                    fs.innerText = 'CANCEL'
+                    fs.createEvent = onclick = function (e) {
+                        console.log("this is eee")
+                        console.log(e)
+                    }
+                    ss = document.createElement('button')
+                    ss.name = 'submit'
+                    ss.value = 'submit'
+                    ss.style = "text-align:center;margin:auto;"
+                    ss.className = "col-lg-2 col-sm-2 col-md-2 col-2 btn btn-primary"
+                    ss.innerText = 'SUBMIT'
+                    ff.item(0).appendChild(sd)
+                    ff.item(0).appendChild(sp)
+                    ff.item(0).appendChild(fs)
+                    ff.item(0).appendChild(ss)
+                }
+            </script>
+            <script>
+
+
+                function oncc(mind) {
+                    var m = document.getElementById(mind)
+                    //var md = document.getElementById(maind)
+                    if (m) {
+                        console.log("got divs");
+                        console.log(m);
+                        //  console.log(md);
+
+
+                        var inputtext = m.value.replace(/(?:(?:\r\n|\r|\n)\s*){2}/gm, "\n");
+                        inputtext = m.value.replace(/(?:(?:\r\n|\r|\n)\s*){3}/gm, "\n ");
+                        var h = m.value.search(/(?:(?:\r\n|\r|\n)\s*){2}/gm)
+                        if (h) {
+                            console.log("got match");
+                        }
+
+                        console.log(inputtext);
+                        m.value = inputtext
+                        var y = m.scrollHeight;
+                        console.log(y);
+                        if(y>70){
+                            m.style.height = "70px";
+                            m.style.overflowY="auto"
+                        }else{
+                            m.style.height = y + "px";
+                        }
+                        
+
+                        // md.style.display = "fit-content";
+                    }
+                    else {
+                        console.log("did not get all divs");
+                        console.log(m);
+                        //  console.log(md);
+                    }
+                }
+            </script>
+
+
+            <div class="row g-0 p-0 " style="margin: auto;height:fit-content;width:100%;">
+
+                <div class="col-12 col-lg-9 col-md-12 col-sm-12 g-0 p-0 mt-0" style="width: 100%;margin:auto">
+                    <button class="col-4 border g-0 p-0 mt-0 " id="comcount" style="margin-left: 0px;font-size: 13px;color: blue;margin-top: 0px;height: min-content;"></button>
+                    <div class="row g-0 p-0 " id="newcomment" name="kka"
+                        style="margin: auto;height:fit-content;width:100%;">
+
+
+                        <img class=" mt-0 g-0 p-0 border mr-0"
+                            style="height:50px;border-radius:25px;width:50px;float:left;margin-bottom:auto"
+                            src='/static/Images/Icons/church.jpg'>
+                        <textarea type="text" class="col-lg-9 col-sm-9 col-md-9 col-8 ml-0 mr-0 mb-2 g-0"
+                            oninput="oncc('myin')" id="myin" placeholder="write comment"
+                            style="height:27px;background-color:seashell;border-radius:4px;text-align:left;overflow: hidden;margin:auto"></textarea>
+                        <button class="col-lg-1 col-sm-2 col-md-2 col-2 btn btn-primary mb-2 g-0 p-0"
+                            style="margin-bottom:1px;margin-top:auto;font-size: 15px;align-content:top;float: right;margin-left: 0px;margin-right: auto;"
+                            onclick="ef({{id}})">Post</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-0 p-0"
+                style="height: max-content;width:100%;margin:auto;;display:flex;scrollbar-width:1px">
+                <div class="col-12 col-lg-8 col-sm-11 com-md-10 g-0 p-0" style="width: 100%;margin:auto">
+                    <div class="row g-0 p-0" id="mycomms"
+                        style="height:max-content;width:100%;margin:auto;border-radius:15px;display:flex;scrollbar-width:1px">
+                    </div>
+                </div>
+
+
+                <script>
+                    function mod(id) {
+                        console.log(id)
+
+                        var p = document.getElementById(id)
+                        console.log(p)
+
+                        if (p) {
+                            console.log("got comment")
+                            var t = "edit" + id
+                            var e = document.getElementById(t)
+                            console.log(t)
+                            console.log(e)
+                            if (e) {
+                                console.log("got eeeeeeeeeee")
+
+                                if (e.style.display === 'flex') {
+                                    console.log("display flex")
+                                    e.style.display = 'none'
+                                } else if (e.style.display === 'flex') {
+                                    console.log("display none")
+                                    e.style.display = 'flex'
+                                } else {
+                                    console.log("display none")
+                                    e.style.display = 'flex'
+                                }
+
+                            }
+
+                        }
+                    }
+
+                    function editc(id) {
+                        console.log(id)
+                        var p = document.getElementById(id)
+                        console.log(p)
+                        //replace comment with input
+                        var y = "comment" + id
+                        console.log(y)
+                        var cb;
+                        var me = "menu" + id
+                        var mer = "comd" + id;
+                        var coo = document.getElementById(mer)
+                        var men = document.getElementById(me)
+                        var t = "edit" + id
+                        var yt = document.getElementById(t)
+                        var yc = document.getElementById(y)
+                        //men.onclick = function(e) {
+                        //  return false
+                        // }
+
+                        if (yc && coo) {
+                            console.log("got yc")
+                            console.log(yc)
+                            var u = yc.innerText
+                            console.log(u)
+
+                            var myd = document.createElement('div')
+                            myd.className = "row border"
+                            myd.id = "div" + id
+                            var maid = "div" + id
+                            myd.style = "width:90%;margin:auto;height:max-content;"
+
+                            var inp = document.createElement("textarea")
+                            inp.className = "col-lg-10 col-sm-10 col-md-10 col-10 border"
+                            inp.style = "margin:auto;word-break:break-all;border-radius:15px;position:relative;margin-top:3px;width:450px;margin-left:50px;height:fit-content;display:flex"
+                            inp.value = u
+
+                            inp.id = "new" + id
+                            var sp = document.createElement("span")
+                            sp.className = "col-lg-3 col-sm-3 col-md-3 col-3"
+
+                            var spp = document.createElement("span")
+                            spp.className = "col-lg-3 col-sm-3 col-md-3 col-3"
+
+                            cb = document.createElement("button")
+                            cb.className = "col-lg-3 col-sm-3 col-md-3 col-3 form-control"
+                            cb.innerText = "Cancel"
+
+                            var sb = document.createElement("button")
+                            sb.className = "col-lg-3 col-sm-3 col-md-3 col-3 form-control"
+                            sb.innerText = "Done"
+                            sb.style = "margin:auto"
+
+                            console.log("got com")
+                            console.log(yc)
+                            console.log(coo);
+                            yt.style.display = 'none'
+                            console.log(p.children);
+                            console.log("main comment div")
+                            console.log(p);
+                            coo.removeChild(yc)
+                            myd.appendChild(inp)
+                            myd.appendChild(sp)
+                            myd.appendChild(cb)
+                            myd.appendChild(sb)
+                            myd.appendChild(spp)
+                            p.appendChild(myd)
+                            coo.style.height = "fit-content"
+                            p.style.height = "max-content"
+                        }
+
+                        cb.addEventListener('click', function () {
+                            console.log("clicking cancel")
+                            cbr(u, maid, id)
+                            men.onclick = function (e) {
+                                mod(id)
+                                var kj = "edit" + id
+                                var dos = document.getElementById(kj)
+                                //  dos.style.display ="none"
+                            }
+
+                        })
+                        sb.addEventListener('click', function () {
+                            console.log("clicking done")
+                            console.log(id)
+                            sendedit(id)
+                        })
+                    }
+
+                    function sendedit(id) {
+                        var mer = "comd" + id;
+                        var coo = document.getElementById(mer)
+                        var ci = "div" + id
+                        var cid = "new" + id
+                        var comdiv = document.getElementById(id)
+                        var com = document.getElementById(cid)
+                        var editdiv = document.getElementById(ci)
+                        console.log(editdiv)
+                        //get new input//maind div//and edit div box
+                        if (com) {
+                            var comv = com.value
+                            console.log(com)
+                            console.log(comv)
+                            var pp = document.createElement('p')
+                            pp.style = "height:fit-content;border-radius:5px;word-break:break-all;"
+                            pp.className = "col-lg-10 col-sm-10 col-md-10 col-10 border"
+                            pp.id = "comment" + id
+                            pp.innerText = comv
+                            console.log("inner p")
+                            console.log(comv)
+
+                            data = {
+                                "Comment": comv,
+                                "Type": "Edit",
+                                "Id": id
+                            };
+                            console.log(data);
+
+                            sio.emit("PhotoComment", data)
+                            //remove edit div add pp
+                            coo.appendChild(pp)
+                            comdiv.removeChild(editdiv)
+                            coo.style = "height:fit-content"
+                            var me = "menu" + id
+                            var men = document.getElementById(me)
+                            men.onclick = function (e) {
+                                mod(id)
+                            }
+                        }
+                    }
+                </script>
+            </div>
+        </div>
+        <script>
+            function cbr(p, div, maind) {
+                console.log(p)
+                console.log(div)
+                console.log(maind)
+                var mer = "comd" + maind;
+                var coo = document.getElementById(mer)
+                var ds = document.getElementById(div)
+                var dm = document.getElementById(maind)
+                var pp = document.createElement('p')
+                pp.style = "height:fit-content;border-radius:5px;word-break:break-all;"
+                pp.className = "col-lg-12 col-sm-12 col-md-12 col-12 border"
+                pp.id = "comment" + maind
+                pp.innerText = p
+                dm.removeChild(ds)
+                coo.appendChild(pp)
+                coo.style = "height:fit-content"
+            }
+
+            function cbrr(div, maind) {
+                console.log(div)
+                console.log(maind)
+                var ds = document.getElementById(div)
+                var dm = document.getElementById(maind)
+                dm.removeChild(ds)
+            }
+
+            function removec(id) {
+                console.log(id)
+                var p = document.getElementById(id)
+                console.log(p)
+                //replace comment with input
+                var y = "comment" + id
+                console.log(y)
+                var t = "edit" + id
+                var yt = document.getElementById(t)
+                var yc = document.getElementById(y)
+                var me = "menu" + id
+                var men = document.getElementById(me)
+                men.onclick = function (e) {
+                    return false
+                }
+                if (yc) {
+                    console.log("got yc")
+                    console.log(yc)
+                    var u = yc.innerText
+                    console.log(u)
+
+                    np = document.createElement("label")
+                    np.className = "col-lg-12 col-sm-12 col-md-12 col-12"
+                    np.style = "word-break:break-all;text-align:center;margin-top:5px"
+                    np.innerText = "Delete this comment?"
+
+                    var myd = document.createElement('div')
+                    myd.className = "row border"
+                    myd.id = "div" + id
+                    var maid = "div" + id
+                    myd.style = "width:90%;margin:auto;position:absoulute;"
+
+                    sp = document.createElement("span")
+                    sp.className = "col-lg-6 col-sm-6 col-md-6 col-6"
+
+                    var cb = document.createElement("button")
+                    cb.className = "col-lg-3 col-sm-3 col-md-3 col-3 form-control"
+                    cb.style = "margin:auto;margin-right:5px;"
+                    cb.innerText = "Keep"
+                    cb.addEventListener('click', function () {
+                        console.log("clicking cancel")
+                        cbrr(maid, id)
+                        men.onclick = function (e) {
+                            mod(id)
+                            var kj = "edit" + id
+                            var dos = document.getElementById(kj)
+                            // 
+                            dos.style.display = "none"
+                        }
+                    })
+
+                    var sb = document.createElement("button")
+                    sb.className = "col-lg-3 col-sm-3 col-md-3 col-3 form-control"
+                    sb.innerText = "Delete"
+                    sb.style = "margin:auto;margin-left:5px;margin-right:auto;"
+                    sb.addEventListener('click', function () {
+                        console.log("clicking delete")
+                        console.log(id)
+                        remhandle(id)
+                    })
+
+                    console.log("got com")
+                    console.log(yc)
+                    console.log(p.children)
+                    yt.style.display = 'none'
+
+                    myd.appendChild(np)
+                    // myd.appendChild(sp)
+                    myd.appendChild(cb)
+                    myd.appendChild(sb)
+                    p.appendChild(myd)
+
+                }
+            }
+
+            function remhandle(id) {
+                var ci = "div" + id
+                var cid = "new" + id
+                var comdiv = document.getElementById(id)
+                var com = document.getElementById(cid)
+                var editdiv = document.getElementById(ci)
+                console.log(editdiv)
+                var mall = document.getElementById("mycomms")
+                if (comdiv) {
+                    mall.removeChild(comdiv)
+                    data = {
+                        "Type": "Delete",
+                        "Id": id
+                    }
+                    console.log(data);
+                    sio.emit("PhotoComment", data)
+                }
+            }
+
+            function flagc(id) {
+                console.log(id)
+                var p = document.getElementById(id)
+                console.log(p)
+                //replace comment with input
+                var y = "comment" + id
+                console.log(y)
+                var inp = document.createElement("textarea")
+                var yc = document.getElementById(y)
+                var t = "edit" + id
+                var yt = document.getElementById(t)
+                var me = "menu" + id
+                var men = document.getElementById(me)
+                men.onclick = function (e) {
+                    return false
+                }
+                if (yc) {
+                    console.log("got yc")
+                    console.log(yc)
+                    var u = yc.innerText
+                    console.log(u);
+
+                    var myd = document.createElement('div')
+                    myd.className = "row border"
+                    myd.id = "div" + id
+                    var maid = "div" + id
+                    myd.style = "width:90%;margin:auto;margin-top:0px;height:max-content";
+
+                    var my = document.createElement('div')
+                    my.className = "row border"
+                    // myd.id = "div" + id
+                    // var maid = "div" + id
+                    my.style = "width:90%;margin:auto;margin-top:20px;height:max-content";
+
+                    var inp = document.createElement("textarea")
+                    inp.className = "col-lg-10 col-sm-10 col-md-10 col-10 border"
+                    var cid = "flag" + id
+                    inp.id = cid
+                    inp.style = "margin:auto;word-break:break-all;border-radius:15px;position:relative;height:fit-content;display:flex";
+
+                    np = document.createElement("label")
+                    np.className = "col-lg-12 col-sm-12 col-md-12 col-12 mt-0 mb-0 g-0"
+                    np.style = "word-break:break-all;text-align:center;margin-top:0px"
+                    np.innerText = "Reason for reporting this comment";
+
+                    sp = document.createElement("span")
+                    sp.className = "col-lg-6 col-sm-6 col-md-6 col-6";
+
+                    var cb = document.createElement("button")
+                    cb.className = "col-lg-3 col-sm-3 col-md-3 col-3 mt-1 form-control"
+                    cb.innerText = "Cancel";
+                    cb.style = "margin:auto;margin-right:5px;"
+
+                    var sb = document.createElement("button")
+                    sb.className = "col-lg-3 col-sm-3 col-md-3 col-3 mt-1 form-control"
+                    sb.innerText = "Done";
+                    sb.style = "margin:auto;margin-left:5px;"
+
+                    console.log("got com")
+                    console.log(yc)
+                    console.log(p.children);
+
+                    yt.style.display = 'none'
+                    myd.appendChild(np)
+                    myd.appendChild(inp)
+                    //myd.appendChild(sp)
+                    myd.appendChild(cb)
+                    myd.appendChild(sb)
+                    // my.appendChild(myd)
+                    p.appendChild(myd)
+                    p.style.height = "max-content"
+
+                    cb.addEventListener('click', function () {
+                        console.log("clicking cancel")
+                        cbrr(maid, id)
+                        men.onclick = function (e) {
+                            mod(id)
+                            var kj = "edit" + id
+                            var dos = document.getElementById(kj)
+                            //  dos.style.display ="none"
+                        }
+                    })
+                    sb.addEventListener('click', function () {
+                        console.log("clicking flag")
+                        console.log(id)
+                        sendflag(id)
+                    })
+                }
+            }
+
+            function sendflag(id) {
+                var ci = "div" + id
+                var cid = "flag" + id
+                var comdiv = document.getElementById(id)
+                var com = document.getElementById(cid)
+                var editdiv = document.getElementById(ci)
+                console.log(editdiv)
+                console.log("reason")
+                console.log(com.value)
+                var mall = document.getElementById("mycomms")
+                if (comdiv) {
+                    //var pp = document.createElement('p')
+                    // pp.style ="margin:auto;word-break:break-all;border-radius:15px;position:relative;margin-top:10px;height:fit-content;text-align:right;font-size:10px"
+                    // pp.className ="col-12 border"
+                    //  pp.innerText ="this comment has been flagged"
+                    //  comdiv.appendChild(pp)
+                    var ii = "flag" + id
+                    var c = document.getElementById(ii)
+                    if (c) {
+                        c.innerText = "this comment has been flagged"
+                    }
+                    comdiv.removeChild(editdiv)
+                    var me = "menu" + id
+                    var men = document.getElementById(me)
+                    men.onclick = function (e) {
+                        mod(id)
+                    }
+                    if (com.value === "") {
+                        data = {
+                            "Reason": '',
+                            "Type": "Flag",
+                            "Id": id
+                        }
+                    }
+                    data = {
+                        "Reason": com.value,
+                        "Type": "Flag",
+                        "Id": id
+                    }
+                    console.log(data)
+                    sio.emit("PhotoComment", data)
+                } //get com div add text this comment has beeen flaged
+            }
+        </script>
+
+
+
+
+
+
+    </div>
+    </div>
+
+</body>
+
+</html>
+
+</html>
+
+</html>
